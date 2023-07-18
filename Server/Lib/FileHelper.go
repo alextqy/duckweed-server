@@ -85,3 +85,12 @@ func FileWriteAppend(FilePath string, Content string) (bool, string) {
 		return true, ""
 	}
 }
+
+func DirMake(DirPath string) (bool, string) {
+	Err := os.MkdirAll(DirPath, os.ModePerm)
+	if Err != nil {
+		return false, Err.Error()
+	} else {
+		return true, ""
+	}
+}
