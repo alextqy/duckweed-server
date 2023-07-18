@@ -94,3 +94,11 @@ func DirMake(DirPath string) (bool, string) {
 		return true, ""
 	}
 }
+
+func DirCheck(DirPath string) (bool, string, []os.FileInfo) {
+	Files, Err := ioutil.ReadDir(DirPath)
+	if Err != nil {
+		return false, Err.Error(), nil
+	}
+	return true, "", Files
+}
