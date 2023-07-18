@@ -1,10 +1,2 @@
 desktop.ini
 /.vscode
-/solution/.vs
-/solution/server/.config
-/solution/server/v16
-/solution/server/obj
-/solution/server/bin
-/solution/server/Log
-/solution/server/output
-/solution/server/app
