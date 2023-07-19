@@ -6,99 +6,99 @@ import (
 	"os"
 )
 
-func FileExist(FilePath string) bool {
-	_, Err := os.Stat(FilePath)
-	return !os.IsNotExist(Err)
+func FileExist(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return !os.IsNotExist(err)
 }
 
-func FileMake(FilePath string) (bool, string) {
-	F, Err := os.Create(FilePath)
-	defer F.Close()
-	if Err != nil {
-		return false, Err.Error()
+func FileMake(filePath string) (bool, string) {
+	f, err := os.Create(filePath)
+	defer f.Close()
+	if err != nil {
+		return false, err.Error()
 	}
 	return true, ""
 }
 
-func FileRemove(FilePath string) (bool, string) {
-	Err := os.Remove(FilePath)
-	if Err != nil {
-		return false, Err.Error()
+func FileRemove(filePath string) (bool, string) {
+	err := os.Remove(filePath)
+	if err != nil {
+		return false, err.Error()
 	}
 	return true, ""
 }
 
-func FileRename(FilePath string, NewName string) (bool, string) {
-	Err := os.Rename(FilePath, NewName)
-	if Err != nil {
-		return false, Err.Error()
+func FileRename(filePath string, newName string) (bool, string) {
+	err := os.Rename(filePath, newName)
+	if err != nil {
+		return false, err.Error()
 	}
 	return true, ""
 }
 
-func Filespec(FilePath string) (bool, os.FileInfo) {
-	FileInfo, Err := os.Stat(FilePath)
-	if Err != nil {
+func Filespec(filePath string) (bool, os.FileInfo) {
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
 		return false, nil
 	}
-	return true, FileInfo
+	return true, fileInfo
 }
 
-func FileRead(FilePath string) (bool, string) {
-	F, Err := os.OpenFile(FilePath, os.O_RDONLY, 0600)
-	defer F.Close()
-	if Err != nil {
-		return false, Err.Error()
+func FileRead(filePath string) (bool, string) {
+	f, err := os.OpenFile(filePath, os.O_RDONLY, 0600)
+	defer f.Close()
+	if err != nil {
+		return false, err.Error()
 	} else {
-		ContentByte, ReadErr := ioutil.ReadAll(F)
-		if ReadErr != nil {
-			return false, ReadErr.Error()
+		contentByte, readErr := ioutil.ReadAll(f)
+		if readErr != nil {
+			return false, readErr.Error()
 		}
-		return true, string(ContentByte)
+		return true, string(contentByte)
 	}
 }
 
-func FileWrite(FilePath string, Content string) (bool, string) {
-	F, Err := os.OpenFile(FilePath, os.O_WRONLY|os.O_TRUNC, 0600)
-	defer F.Close()
-	if Err != nil {
-		return false, Err.Error()
+func FileWrite(filePath string, content string) (bool, string) {
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0600)
+	defer f.Close()
+	if err != nil {
+		return false, err.Error()
 	} else {
-		_, WriteErr := F.Write([]byte(Content))
-		if WriteErr != nil {
-			return false, Err.Error()
+		_, writeErr := f.Write([]byte(content))
+		if writeErr != nil {
+			return false, err.Error()
 		} else {
 			return true, ""
 		}
 	}
 }
 
-func FileWriteAppend(FilePath string, Content string) (bool, string) {
-	F, Err := os.OpenFile(FilePath, os.O_WRONLY|os.O_APPEND, 0666)
-	defer F.Close()
-	if Err != nil {
-		return false, Err.Error()
+func FileWriteAppend(filePath string, content string) (bool, string) {
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0666)
+	defer f.Close()
+	if err != nil {
+		return false, err.Error()
 	} else {
-		Write := bufio.NewWriter(F)
-		Write.WriteString(Content)
-		Write.Flush()
+		write := bufio.NewWriter(f)
+		write.WriteString(content)
+		write.Flush()
 		return true, ""
 	}
 }
 
-func DirMake(DirPath string) (bool, string) {
-	Err := os.MkdirAll(DirPath, os.ModePerm)
-	if Err != nil {
-		return false, Err.Error()
+func DirMake(dirPath string) (bool, string) {
+	err := os.MkdirAll(dirPath, os.ModePerm)
+	if err != nil {
+		return false, err.Error()
 	} else {
 		return true, ""
 	}
 }
 
-func DirCheck(DirPath string) (bool, string, []os.FileInfo) {
-	Files, Err := ioutil.ReadDir(DirPath)
-	if Err != nil {
-		return false, Err.Error(), nil
+func DirCheck(dirPath string) (bool, string, []os.FileInfo) {
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return false, err.Error(), nil
 	}
-	return true, "", Files
+	return true, "", files
 }
