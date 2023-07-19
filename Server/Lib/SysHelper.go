@@ -1,8 +1,11 @@
-package Lib
+package lib
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/base64"
 	"encoding/binary"
+	"encoding/hex"
 	"net"
 	"os"
 	"strconv"
@@ -12,14 +15,6 @@ import (
 func GetEnv(key string) string {
 	return os.Getenv(key)
 }
-
-// func SetEnv(key string, Value string) error {
-// 	return os.Setenv(key, Value)
-// }
-
-// func UnsetEnv(key string) error {
-// 	return os.Unsetenv(key)
-// }
 
 func LocalIP() (bool, string, []string) {
 	addrs, err := net.InterfaceAddrs()
@@ -104,4 +99,23 @@ func TimeStampMS() int64 {
 
 func TimeStampToStr(t int64) string {
 	return time.Unix(t, 0).Format("2006-01-02 15:04:05")
+}
+
+func MD5(s string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(s))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func EnBase64(s string) string {
+	sBytes := []byte(s)
+	return base64.StdEncoding.EncodeToString(sBytes)
+}
+
+func DeBase64(s64 string) string {
+	decoded, err := base64.StdEncoding.DecodeString(s64)
+	if err != nil {
+		return ""
+	}
+	return string(decoded)
 }
