@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 )
 
 func GetEnv(key string) string {
@@ -83,4 +84,24 @@ func BytesToInt(data []byte) int {
 	var dataInt int32
 	binary.Read(bytesBuffer, binary.BigEndian, &dataInt)
 	return int(dataInt)
+}
+
+func TimeNow() time.Time {
+	return time.Now()
+}
+
+func TimeNowStr() string {
+	return time.Now().Format("2006-01-02 15:04:05") // 2006-01-02 15:04:05 golang立项时间
+}
+
+func TimeStamp() int64 {
+	return time.Now().Unix()
+}
+
+func TimeStampMS() int64 {
+	return time.Now().UnixNano()
+}
+
+func TimeStampToStr(t int64) string {
+	return time.Unix(t, 0).Format("2006-01-02 15:04:05")
 }
