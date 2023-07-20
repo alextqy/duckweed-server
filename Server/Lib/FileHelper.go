@@ -2,6 +2,8 @@ package lib
 
 import (
 	"bufio"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 )
@@ -13,7 +15,13 @@ func FileExist(filePath string) bool {
 
 func FileMake(filePath string) (bool, string) {
 	f, err := os.Create(filePath)
-	defer f.Close()
+
+	defer func(f io.Closer) {
+		if err := f.Close(); err != nil {
+			fmt.Printf("defer close file err: %v", err.Error())
+		}
+	}(f)
+
 	if err != nil {
 		return false, err.Error()
 	}
@@ -46,7 +54,13 @@ func Filespec(filePath string) (bool, os.FileInfo) {
 
 func FileRead(filePath string) (bool, string) {
 	f, err := os.OpenFile(filePath, os.O_RDONLY, 0600)
-	defer f.Close()
+
+	defer func(f io.Closer) {
+		if err := f.Close(); err != nil {
+			fmt.Printf("defer close file err: %v", err.Error())
+		}
+	}(f)
+
 	if err != nil {
 		return false, err.Error()
 	} else {
@@ -60,7 +74,13 @@ func FileRead(filePath string) (bool, string) {
 
 func FileWrite(filePath string, content string) (bool, string) {
 	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0600)
-	defer f.Close()
+
+	defer func(f io.Closer) {
+		if err := f.Close(); err != nil {
+			fmt.Printf("defer close file err: %v", err.Error())
+		}
+	}(f)
+
 	if err != nil {
 		return false, err.Error()
 	} else {
@@ -75,7 +95,13 @@ func FileWrite(filePath string, content string) (bool, string) {
 
 func FileWriteAppend(filePath string, content string) (bool, string) {
 	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0666)
-	defer f.Close()
+
+	defer func(f io.Closer) {
+		if err := f.Close(); err != nil {
+			fmt.Printf("defer close file err: %v", err.Error())
+		}
+	}(f)
+
 	if err != nil {
 		return false, err.Error()
 	} else {

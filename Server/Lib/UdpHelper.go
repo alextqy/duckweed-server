@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"time"
 )
@@ -43,7 +44,7 @@ func UdpClient(ip string, port string) {
 	go receive(conn) // 使用DialUDP建立连接后也可以监听来自远程端的数据
 
 	for {
-		_, err3 := conn.Write([]byte("naisu233~~~")) // 向远程端发送消息
+		_, err3 := conn.Write([]byte("hi")) // 向远程端发送消息
 		if err3 != nil {
 			fmt.Println(err3.Error())
 			return
@@ -99,7 +100,13 @@ func BroadcastAddress() ([]string, string) {
 // udp广播
 func Broadcast(port string, content string) {
 	conn, err := net.Dial("udp", "255.255.255.255:"+port)
-	defer conn.Close()
+
+	defer func(conn io.Closer) {
+		if err := conn.Close(); err != nil {
+			fmt.Printf("defer close io err: %v", err.Error())
+		}
+	}(conn)
+
 	if err != nil {
 		fmt.Println(err.Error())
 	}
