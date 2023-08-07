@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// socket服务器
+// udp socket 服务器
 func UdpServer(port string, content string, bufSize int) {
 	udpAddr, err := net.ResolveUDPAddr("udp4", ":"+port) // 转换地址，作为服务器使用时需要监听本机的一个端口
 	if err != nil {
