@@ -2,13 +2,25 @@ package main
 
 import (
 	api "duckweed-server/Server/Api"
+	lib "duckweed-server/Server/Lib"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 )
 
 func main() {
-	port := "8000"
+	if !lib.FileExist("./Dao.db") {
+		_, memo := lib.FileMake("./Dao.db")
+		if memo != "" {
+			log.Fatal(memo)
+		}
+	}
+
+	port := ""
+	fmt.Println("Enter port number: ")
+	fmt.Scan(&port)
+
 	mux := http.NewServeMux()
 	routes(mux)
 	server := &http.Server{
