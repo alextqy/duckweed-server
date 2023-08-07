@@ -1,15 +1,17 @@
 package model
 
 import (
-	"database/sql"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func ConnDB() (bool, string, *sql.DB) {
-	db, err := sql.Open("sqlite3", "../Dao.db")
+func ConnDB() (bool, string, *gorm.DB) {
+	db, err := gorm.Open(sqlite.Open("../Dao.db"), &gorm.Config{})
 	if err != nil {
 		return false, err.Error(), nil
+	} else {
+		return true, "", db
 	}
-	return true, "", db
 }
