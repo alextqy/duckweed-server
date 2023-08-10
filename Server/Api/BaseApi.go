@@ -57,7 +57,7 @@ func FormFile(w http.ResponseWriter, r *http.Request, key string) (bool, string)
 	return true, newf.Name()
 }
 
-func HttpWrite(w http.ResponseWriter, Data *entity.Result) (int, error) {
+func HttpWrite(w http.ResponseWriter, Data entity.Result) (int, error) {
 	j, err := json.Marshal(Data)
 	if err != nil {
 		return 0, err

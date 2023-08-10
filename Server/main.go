@@ -25,9 +25,9 @@ func main() {
 
 	// 新建数据库文件
 	if !lib.FileExist("./Dao.db") {
-		_, memo := lib.FileMake("./Dao.db")
-		if memo != "" {
-			panic(memo)
+		DaoState, memo := lib.FileMake("./Dao.db")
+		if !DaoState {
+			log.Fatal(memo)
 		}
 	}
 
@@ -48,6 +48,10 @@ func main() {
 
 func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/test", api.Test)
+	mux.HandleFunc("/user/list", api.UserList)
+	mux.HandleFunc("/user/get", api.UserGet)
+	mux.HandleFunc("/user/check", api.UserCheck)
+	mux.HandleFunc("/user/del", api.UserDel)
 }
 
 func loopBroadcast(ip string, port string) {

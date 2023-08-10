@@ -9,6 +9,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -19,6 +20,7 @@ func GetEnv(key string) string {
 func LocalIP() (bool, string, []string) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
+
 		return false, err.Error(), nil
 	} else {
 		var ips []string
@@ -44,6 +46,17 @@ func ByteToString(data []byte) string {
 func StringToInt(data string) (bool, string, int) {
 	res, err := strconv.Atoi(data)
 	if err != nil {
+
+		return false, err.Error(), 0
+	} else {
+		return true, "", res
+	}
+}
+
+func StringToInt64(data string) (bool, string, int64) {
+	res, err := strconv.ParseInt(data, 10, 64)
+	if err != nil {
+
 		return false, err.Error(), 0
 	} else {
 		return true, "", res
@@ -54,9 +67,14 @@ func IntToString(data int) string {
 	return strconv.Itoa(data)
 }
 
+func Int64ToString(data int64) string {
+	return strconv.FormatInt(data, 10)
+}
+
 func StringToFloat64(data string) (bool, string, float64) {
 	s, err := strconv.ParseFloat(data, 64)
 	if err != nil {
+
 		return false, err.Error(), 0
 	} else {
 		return true, "", s
@@ -108,14 +126,18 @@ func MD5(s string) string {
 }
 
 func EnBase64(s string) string {
-	sBytes := []byte(s)
-	return base64.StdEncoding.EncodeToString(sBytes)
+	return base64.StdEncoding.EncodeToString([]byte(s))
 }
 
-func DeBase64(s64 string) string {
+func DeBase64(s64 string) (bool, string, string) {
 	decoded, err := base64.StdEncoding.DecodeString(s64)
 	if err != nil {
-		return ""
+
+		return false, err.Error(), ""
 	}
-	return string(decoded)
+	return true, "", string(decoded)
+}
+
+func StringContains(data string, subs string) bool {
+	return strings.Contains(data, subs)
 }
