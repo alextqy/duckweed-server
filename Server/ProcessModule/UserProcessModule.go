@@ -24,18 +24,22 @@ func UserGet(id string) entity.Result {
 	return res
 }
 
-func UserList(page string, pageSize string, order string, account string, name string, level string, status string) entity.Result {
+func UserList(page string, pageSize string, order string, account string, name string, level string, status string) entity.ResultList {
 	_, _, db := model.ConnDB()
 	_, _, pageInt := lib.StringToInt(page)
 	_, _, pageSizeInt := lib.StringToInt(pageSize)
 	_, _, orderInt := lib.StringToInt(order)
 	_, _, levelInt := lib.StringToInt(level)
 	_, _, statusInt := lib.StringToInt(status)
-	res := entity.Result{
-		State:   true,
-		Code:    200,
-		Message: "",
-		Data:    model.UserList(db, pageInt, pageSizeInt, orderInt, account, name, levelInt, statusInt),
+	p, ps, t, list := model.UserList(db, pageInt, pageSizeInt, orderInt, account, name, levelInt, statusInt)
+	res := entity.ResultList{
+		State:     true,
+		Code:      200,
+		Message:   "",
+		Page:      p,
+		PageSize:  ps,
+		TotalPage: t,
+		Data:      list,
 	}
 	db.Close()
 	return res

@@ -65,7 +65,7 @@ func UserData(db *sql.DB, id string) (bool, string, entity.UserEntity) {
 	return true, "", user
 }
 
-func UserList(db *sql.DB, page int, pageSize int, order int, account string, name string, level int, status int) []entity.UserEntity {
+func UserList(db *sql.DB, page int, pageSize int, order int, account string, name string, level int, status int) (int, int, int, []entity.UserEntity) {
 	users := []entity.UserEntity{}
 	condition_account := "1=1"
 	condition_name := "1=1"
@@ -103,17 +103,17 @@ func UserList(db *sql.DB, page int, pageSize int, order int, account string, nam
 		" ORDER BY ID " + orderBy + " LIMIT " + lib.IntToString(pageSize) + " OFFSET " + lib.IntToString((page-1)*pageSize)
 	rows, err := db.Query(sqlCom)
 	if err != nil {
-		return nil
+		return 0, 0, 0, nil
 	}
 	for rows.Next() {
 		user := entity.UserEntity{}
 		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level)
 		if err != nil {
-			return nil
+			return 0, 0, 0, nil
 		}
 		users = append(users, user)
 	}
-	return users
+	return page, pageSize, int(totalPage), users
 }
 
 func UserDel(db *sql.DB, id string) (bool, string, int) {

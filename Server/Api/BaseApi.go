@@ -1,7 +1,6 @@
 package api
 
 import (
-	entity "duckweed-server/Server/Entity"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -57,7 +56,7 @@ func FormFile(w http.ResponseWriter, r *http.Request, key string) (bool, string)
 	return true, newf.Name()
 }
 
-func HttpWrite(w http.ResponseWriter, Data entity.Result) (int, error) {
+func HttpWrite(w http.ResponseWriter, Data interface{}) (int, error) {
 	j, err := json.Marshal(Data)
 	if err != nil {
 		return 0, err
