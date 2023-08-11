@@ -39,7 +39,7 @@ func UserUpdate(db *sql.DB, id string, data entity.UserEntity) (bool, string, in
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	data.Password = lib.MD5(lib.MD5(data.Password + lib.Int64ToString(lib.TimeStamp()) + data.Password))
+	data.Password = lib.MD5(lib.MD5(lib.Int64ToString(lib.TimeStamp()) + data.Password + lib.Int64ToString(lib.TimeStamp())))
 	res, err := stmt.Exec(data.Account, data.Name, data.Password, data.Status, data.Level, id)
 	if err != nil {
 		return false, err.Error(), 0
@@ -52,23 +52,23 @@ func UserUpdate(db *sql.DB, id string, data entity.UserEntity) (bool, string, in
 }
 
 func UserData(db *sql.DB, id string) (bool, string, entity.UserEntity) {
-	user := entity.UserEntity{}
+	data := entity.UserEntity{}
 	sqlCom := "SELECT * FROM User WHERE ID=" + id
 	rows, err := db.Query(sqlCom)
 	if err != nil {
-		return false, err.Error(), user
+		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level, &user.Createtime)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Status, &data.Level, &data.Createtime)
 		if err != nil {
-			return false, err.Error(), user
+			return false, err.Error(), data
 		}
 	}
-	return true, "", user
+	return true, "", data
 }
 
 func Users(db *sql.DB, order int, account string, name string, level int, status int) []entity.UserEntity {
-	users := []entity.UserEntity{}
+	datas := []entity.UserEntity{}
 	condition_account := "1=1"
 	condition_name := "1=1"
 	condition_level := "1=1"
@@ -99,24 +99,24 @@ func Users(db *sql.DB, order int, account string, name string, level int, status
 		return nil
 	}
 	for rows.Next() {
-		user := entity.UserEntity{}
-		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level, &user.Createtime)
+		data := entity.UserEntity{}
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Status, &data.Level, &data.Createtime)
 		if err != nil {
 			fmt.Println(err.Error())
 			return nil
 		}
-		users = append(users, user)
+		datas = append(datas, data)
 	}
-	if len(users) > 0 {
-		for i := 0; i < len(users); i++ {
-			users[i].Password = ""
+	if len(datas) > 0 {
+		for i := 0; i < len(datas); i++ {
+			datas[i].Password = ""
 		}
 	}
-	return users
+	return datas
 }
 
 func UserList(db *sql.DB, page int, pageSize int, order int, account string, name string, level int, status int) (int, int, int, []entity.UserEntity) {
-	users := []entity.UserEntity{}
+	datas := []entity.UserEntity{}
 	condition_account := "1=1"
 	condition_name := "1=1"
 	condition_level := "1=1"
@@ -157,21 +157,21 @@ func UserList(db *sql.DB, page int, pageSize int, order int, account string, nam
 		return 0, 0, 0, nil
 	}
 	for rows.Next() {
-		user := entity.UserEntity{}
-		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level, &user.Createtime)
+		data := entity.UserEntity{}
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Status, &data.Level, &data.Createtime)
 		if err != nil {
 			fmt.Println(err.Error())
 			return 0, 0, 0, nil
 		}
-		users = append(users, user)
+		datas = append(datas, data)
 	}
 
-	if len(users) > 0 {
-		for i := 0; i < len(users); i++ {
-			users[i].Password = ""
+	if len(datas) > 0 {
+		for i := 0; i < len(datas); i++ {
+			datas[i].Password = ""
 		}
 	}
-	return page, pageSize, int(totalPage), users
+	return page, pageSize, int(totalPage), datas
 }
 
 func UserDel(db *sql.DB, id string) (bool, string, int) {
