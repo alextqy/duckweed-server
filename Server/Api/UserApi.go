@@ -5,6 +5,15 @@ import (
 	"net/http"
 )
 
+func Users(w http.ResponseWriter, r *http.Request) {
+	order := Post(r, "order")
+	account := Post(r, "account")
+	name := Post(r, "name")
+	level := Post(r, "level")
+	status := Post(r, "status")
+	HttpWrite(w, processmodule.Users(order, account, name, level, status))
+}
+
 func UserList(w http.ResponseWriter, r *http.Request) {
 	page := Post(r, "page")
 	pageSize := Post(r, "pageSize")

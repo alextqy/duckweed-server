@@ -24,8 +24,8 @@ func main() {
 	json.Unmarshal([]byte(byteData), &confEntity)
 
 	// 新建数据库文件
-	if !lib.FileExist("./Dao.db") {
-		DaoState, memo := lib.FileMake("./Dao.db")
+	if !lib.FileExist("../Dao.db") {
+		DaoState, memo := lib.FileMake("../Dao.db")
 		if !DaoState {
 			log.Fatal(memo)
 		}
@@ -48,6 +48,7 @@ func main() {
 
 func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/test", api.Test)
+	mux.HandleFunc("/users", api.Users)
 	mux.HandleFunc("/user/list", api.UserList)
 	mux.HandleFunc("/user/get", api.UserGet)
 	mux.HandleFunc("/user/check", api.UserCheck)

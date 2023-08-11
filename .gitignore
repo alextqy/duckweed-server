@@ -1,4 +1,5 @@
 desktop.ini
 /.vscode
-/Temp/*
-/Dao.db
+/Server/Temp/Upload/*
+/Server/Log/*
+Dao.db

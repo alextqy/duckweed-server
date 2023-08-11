@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	entity "duckweed-server/Server/Entity"
 	lib "duckweed-server/Server/Lib"
+	"fmt"
 	"math"
 )
 
@@ -14,13 +15,14 @@ func UserCount(db *sql.DB) int {
 }
 
 func UserAdd(db *sql.DB, data entity.UserEntity) (bool, string, int) {
-	sqlCom := "INSERT INTO User(Account,Name,Password,Status,Level) VALUES(?,?,?,?,?)"
+	sqlCom := "INSERT INTO User(Account,Name,Password,Status,Level,Createtime) VALUES(?,?,?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	data.Password = lib.MD5(lib.MD5(data.Password + lib.Int64ToString(lib.TimeStamp()) + data.Password))
-	row, err := stmt.Exec(data.Account, data.Name, data.Password, data.Status, data.Level)
+	data.Password = lib.MD5(lib.MD5(lib.Int64ToString(lib.TimeStamp()) + data.Password + lib.Int64ToString(lib.TimeStamp())))
+	data.Createtime = int(lib.TimeStamp())
+	row, err := stmt.Exec(data.Account, data.Name, data.Password, data.Status, data.Level, data.Createtime)
 	if err != nil {
 		return false, err.Error(), 0
 	}
@@ -57,12 +59,60 @@ func UserData(db *sql.DB, id string) (bool, string, entity.UserEntity) {
 		return false, err.Error(), user
 	}
 	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level)
+		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level, &user.Createtime)
 		if err != nil {
 			return false, err.Error(), user
 		}
 	}
 	return true, "", user
+}
+
+func Users(db *sql.DB, order int, account string, name string, level int, status int) []entity.UserEntity {
+	users := []entity.UserEntity{}
+	condition_account := "1=1"
+	condition_name := "1=1"
+	condition_level := "1=1"
+	condition_status := "1=1"
+	if account != "" {
+		condition_account = "Account LIKE '%" + account + "%'"
+	}
+	if name != "" {
+		condition_name = "Name LIKE '%" + name + "%'"
+	}
+	if level > 0 {
+		condition_level = "Level = " + lib.IntToString(level)
+	}
+	if status > 0 {
+		condition_status = "Status = " + lib.IntToString(status)
+	}
+	orderBy := ""
+	if order == -1 {
+		orderBy = "DESC"
+	} else {
+		orderBy = "ASC"
+	}
+	sqlCom := "SELECT * FROM User WHERE " + condition_account + " AND " + condition_name + " AND " + condition_level + " AND " + condition_status +
+		" ORDER BY ID " + orderBy
+	rows, err := db.Query(sqlCom)
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil
+	}
+	for rows.Next() {
+		user := entity.UserEntity{}
+		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level, &user.Createtime)
+		if err != nil {
+			fmt.Println(err.Error())
+			return nil
+		}
+		users = append(users, user)
+	}
+	if len(users) > 0 {
+		for i := 0; i < len(users); i++ {
+			users[i].Password = ""
+		}
+	}
+	return users
 }
 
 func UserList(db *sql.DB, page int, pageSize int, order int, account string, name string, level int, status int) (int, int, int, []entity.UserEntity) {
@@ -103,15 +153,23 @@ func UserList(db *sql.DB, page int, pageSize int, order int, account string, nam
 		" ORDER BY ID " + orderBy + " LIMIT " + lib.IntToString(pageSize) + " OFFSET " + lib.IntToString((page-1)*pageSize)
 	rows, err := db.Query(sqlCom)
 	if err != nil {
+		fmt.Println(err.Error())
 		return 0, 0, 0, nil
 	}
 	for rows.Next() {
 		user := entity.UserEntity{}
-		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level)
+		err := rows.Scan(&user.ID, &user.Account, &user.Name, &user.Password, &user.Status, &user.Level, &user.Createtime)
 		if err != nil {
+			fmt.Println(err.Error())
 			return 0, 0, 0, nil
 		}
 		users = append(users, user)
+	}
+
+	if len(users) > 0 {
+		for i := 0; i < len(users); i++ {
+			users[i].Password = ""
+		}
 	}
 	return page, pageSize, int(totalPage), users
 }
