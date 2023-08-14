@@ -2,6 +2,8 @@ package lib
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/binary"
@@ -140,4 +142,53 @@ func DeBase64(s64 string) (bool, string, string) {
 
 func StringContains(data string, subs string) bool {
 	return strings.Contains(data, subs)
+}
+
+/*
+CBC 加密
+data 待加密的明文
+key 秘钥
+vi 向量
+*/
+func AesEncrypterCBC(data_s string, key_s string, iv_s string) (bool, string, string) {
+	data := []byte(data_s)
+	key := []byte(key_s)
+	iv := []byte(iv_s)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return false, err.Error(), ""
+	}
+	padding := block.BlockSize() - len(data)%block.BlockSize()
+	var paddingText []byte
+	if padding == 0 {
+		paddingText = bytes.Repeat([]byte{byte(block.BlockSize())}, block.BlockSize())
+	} else {
+		paddingText = bytes.Repeat([]byte{byte(padding)}, padding)
+	}
+	paddText := append(data, paddingText...)
+	blockMode := cipher.NewCBCEncrypter(block, iv)
+	result := make([]byte, len(paddText))
+	blockMode.CryptBlocks(result, paddText)
+	return true, "", string(result)
+}
+
+/*
+CBC 解密
+data 待解密的密文
+key 秘钥
+vi 向量
+*/
+func AesDecrypterCBC(data_s string, key_s string, iv_s string) (bool, string, string) {
+	data := []byte(data_s)
+	key := []byte(key_s)
+	iv := []byte(iv_s)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return false, err.Error(), ""
+	}
+	blockMode := cipher.NewCBCDecrypter(block, iv)
+	result := make([]byte, len(data))
+	blockMode.CryptBlocks(result, data)
+	unPadding := int(result[len(result)-1])
+	return true, "", string(result[:(len(result) - unPadding)])
 }

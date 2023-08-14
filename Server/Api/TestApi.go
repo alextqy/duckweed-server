@@ -6,5 +6,5 @@ import (
 )
 
 func Test(w http.ResponseWriter, r *http.Request) {
-	HttpWrite(w, processmodule.Test())
+	HttpWrite(w, processmodule.Test(Post(r, "text")))
 }
