@@ -34,8 +34,9 @@ func UserCheck(w http.ResponseWriter, r *http.Request) {
 	name := Post(r, "name")
 	password := Post(r, "password")
 	level := Post(r, "level")
+	availableSpace := Post(r, "availableSpace")
 	id := Post(r, "id")
-	HttpWrite(w, processmodule.UserCheck(account, name, password, level, id))
+	HttpWrite(w, processmodule.UserCheck(account, name, password, level, availableSpace, id))
 }
 
 func UserDel(w http.ResponseWriter, r *http.Request) {

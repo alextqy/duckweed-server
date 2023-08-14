@@ -60,7 +60,7 @@ func UserList(page string, pageSize string, order string, account string, name s
 	return res
 }
 
-func UserCheck(account string, name string, password string, level string, id string) entity.Result {
+func UserCheck(account string, name string, password string, level string, availableSpace string, id string) entity.Result {
 	_, _, db := model.ConnDB()
 	res := entity.Result{
 		State:   true,
@@ -68,12 +68,14 @@ func UserCheck(account string, name string, password string, level string, id st
 		Message: "",
 	}
 	_, _, levelInt := lib.StringToInt(level)
+	_, _, availableSpaceInt := lib.StringToInt(availableSpace)
 	user := entity.UserEntity{
-		Account:  account,
-		Name:     name,
-		Password: password,
-		Level:    levelInt,
-		Status:   1,
+		Account:        account,
+		Name:           name,
+		Password:       password,
+		Level:          levelInt,
+		Status:         1,
+		AvailableSpace: availableSpaceInt,
 	}
 
 	var b bool
