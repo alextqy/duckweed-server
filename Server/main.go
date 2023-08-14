@@ -53,6 +53,7 @@ func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/user/get", api.UserGet)
 	mux.HandleFunc("/user/check", api.UserCheck)
 	mux.HandleFunc("/user/del", api.UserDel)
+	mux.HandleFunc("/user/login", api.UserLogin)
 }
 
 func loopBroadcast(ip string, port string) {

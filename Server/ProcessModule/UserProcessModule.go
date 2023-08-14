@@ -2,6 +2,7 @@ package processmodule
 
 import (
 	entity "duckweed-server/Server/Entity"
+	lang "duckweed-server/Server/Lang"
 	lib "duckweed-server/Server/Lib"
 	model "duckweed-server/Server/Model"
 )
@@ -113,6 +114,33 @@ func UserDel(id string) entity.Result {
 		res.Message = s
 	} else {
 		res.Data = r
+	}
+	db.Close()
+	return res
+}
+
+func UserLogin(account string, password string) entity.Result {
+	lang := lang.Lang()
+	_, _, db := model.ConnDB()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+	}
+	b, s, r := model.UserDataAccount(db, account)
+	if !b {
+		res.Message = s
+	} else {
+		if r.ID == 0 {
+			res.Message = lang["NoData"]
+		} else {
+			if lib.MD5(lib.MD5(lib.IntToString(r.Createtime)+password+lib.IntToString(r.Createtime))) != r.Password {
+				res.Message = lang["IncorrectPassword"]
+			} else {
+				res.State = true
+				res.Data = lib.MD5(lib.TimeNowStr() + r.Password + lib.TimeNowStr())
+			}
+		}
 	}
 	db.Close()
 	return res

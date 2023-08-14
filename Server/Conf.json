@@ -1,4 +1,5 @@
 {
     "tcp_port": "8080",
-    "udp_port": "8181"
+    "udp_port": "8181",
+    "lang": "zh"
 }
