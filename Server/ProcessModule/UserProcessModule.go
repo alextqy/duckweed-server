@@ -8,24 +8,6 @@ import (
 )
 
 /*
-func UserGet(id string) entity.Result {
-	_, _, db := model.ConnDB()
-	res := entity.Result{
-		State:   true,
-		Code:    200,
-		Message: "",
-	}
-	b, s, r := model.UserData(db, id)
-	if !b {
-		res.State = false
-		res.Message = s
-	} else {
-		res.Data = r
-	}
-	db.Close()
-	return res
-}
-
 func UserCheck(account string, name string, password string, level string, availableSpace string, id string) entity.Result {
 	_, _, db := model.ConnDB()
 	res := entity.Result{
@@ -270,6 +252,41 @@ func Users(userToken string, order string, account string, name string, level st
 	res.Data = list
 
 	tx.Commit()
+	db.Close()
+	return res
+}
+
+func UserGet(userToken string, id string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	permissions := CheckLevel(userToken)
+	if permissions != 2 {
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+	b, s, r := model.UserData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	tx.Commit()
+	res.Data = r
+
 	db.Close()
 	return res
 }

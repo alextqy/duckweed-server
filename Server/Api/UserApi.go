@@ -38,3 +38,7 @@ func Users(w http.ResponseWriter, r *http.Request) {
 	status := strings.TrimSpace(Post(r, "status"))
 	HttpWrite(w, processmodule.Users(userToken, order, account, name, level, status))
 }
+
+func UserGet(w http.ResponseWriter, r *http.Request) {
+	HttpWrite(w, processmodule.UserGet(strings.TrimSpace(Post(r, "userToken")), strings.TrimSpace(Post(r, "id"))))
+}
