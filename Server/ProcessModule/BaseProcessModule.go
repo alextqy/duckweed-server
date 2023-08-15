@@ -1,7 +1,23 @@
 package processmodule
 
-import entity "duckweed-server/Server/Entity"
+import model "duckweed-server/Server/Model"
 
-type DataReturns struct {
-	entity.Result
+func CheckLevel(userToken string) int {
+	_, _, tx, db := model.ConnDB()
+	if userToken == "" {
+		tx.Rollback()
+		return 0
+	}
+	b, _, userData := model.UserDataToken(tx, userToken)
+	if !b {
+		tx.Rollback()
+		return 0
+	}
+	if userData.Status == 2 {
+		tx.Rollback()
+		return 0
+	}
+	tx.Commit()
+	db.Close()
+	return userData.Level
 }

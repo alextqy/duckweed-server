@@ -77,5 +77,8 @@ func space() {
 
 func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/test", api.Test)
-	mux.HandleFunc("/user/login", api.UserLogin)
+	mux.HandleFunc("/sign/in", api.SignIn)
+	mux.HandleFunc("/sign/out", api.SignOut)
+	mux.HandleFunc("/user/list", api.UserList)
+	mux.HandleFunc("/users", api.Users)
 }

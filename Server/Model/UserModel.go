@@ -66,13 +66,28 @@ func UserData(db *sql.Tx, id string) (bool, string, entity.UserEntity) {
 			return false, err.Error(), data
 		}
 	}
-	data.Password = ""
 	return true, "", data
 }
 
 func UserDataAccount(db *sql.Tx, account string) (bool, string, entity.UserEntity) {
 	data := entity.UserEntity{}
 	sqlCom := "SELECT * FROM User WHERE Account='" + account + "'"
+	rows, err := db.Query(sqlCom)
+	if err != nil {
+		return false, err.Error(), data
+	}
+	for rows.Next() {
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
+		if err != nil {
+			return false, err.Error(), data
+		}
+	}
+	return true, "", data
+}
+
+func UserDataToken(db *sql.Tx, userToken string) (bool, string, entity.UserEntity) {
+	data := entity.UserEntity{}
+	sqlCom := "SELECT * FROM User WHERE UserToken='" + userToken + "'"
 	rows, err := db.Query(sqlCom)
 	if err != nil {
 		return false, err.Error(), data

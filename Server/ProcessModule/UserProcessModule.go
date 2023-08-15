@@ -26,42 +26,6 @@ func UserGet(id string) entity.Result {
 	return res
 }
 
-func Users(order string, account string, name string, level string, status string) entity.Result {
-	_, _, db := model.ConnDB()
-	_, _, orderInt := lib.StringToInt(order)
-	_, _, levelInt := lib.StringToInt(level)
-	_, _, statusInt := lib.StringToInt(status)
-	res := entity.Result{
-		State:   true,
-		Code:    200,
-		Message: "",
-		Data:    model.Users(db, orderInt, account, name, levelInt, statusInt),
-	}
-	db.Close()
-	return res
-}
-
-func UserList(page string, pageSize string, order string, account string, name string, level string, status string) entity.ResultList {
-	_, _, db := model.ConnDB()
-	_, _, pageInt := lib.StringToInt(page)
-	_, _, pageSizeInt := lib.StringToInt(pageSize)
-	_, _, orderInt := lib.StringToInt(order)
-	_, _, levelInt := lib.StringToInt(level)
-	_, _, statusInt := lib.StringToInt(status)
-	p, ps, t, list := model.UserList(db, pageInt, pageSizeInt, orderInt, account, name, levelInt, statusInt)
-	res := entity.ResultList{
-		State:     true,
-		Code:      200,
-		Message:   "",
-		Page:      p,
-		PageSize:  ps,
-		TotalPage: t,
-		Data:      list,
-	}
-	db.Close()
-	return res
-}
-
 func UserCheck(account string, name string, password string, level string, availableSpace string, id string) entity.Result {
 	_, _, db := model.ConnDB()
 	res := entity.Result{
@@ -121,10 +85,9 @@ func UserDel(id string) entity.Result {
 }
 */
 
-func UserLogin(account string, password string) entity.Result {
+func SignIn(account string, password string) entity.Result {
 	lang := lang.Lang()
 	_, _, tx, db := model.ConnDB()
-
 	res := entity.Result{
 		State:   false,
 		Code:    200,
@@ -140,13 +103,19 @@ func UserLogin(account string, password string) entity.Result {
 
 	if userData.ID == 0 {
 		tx.Rollback()
-		res.Message = lang["NoData"]
+		res.Message = lang.NoData
+		return res
+	}
+
+	if userData.Status == 2 {
+		tx.Rollback()
+		res.Message = lang.AccountDisabled
 		return res
 	}
 
 	if lib.MD5(lib.MD5(lib.IntToString(userData.Createtime)+password+lib.IntToString(userData.Createtime))) != userData.Password {
 		tx.Rollback()
-		res.Message = lang["IncorrectPassword"]
+		res.Message = lang.IncorrectPassword
 		return res
 	}
 
@@ -183,6 +152,124 @@ func UserLogin(account string, password string) entity.Result {
 	res.State = true
 	res.Data = userData.UserToken
 
+	db.Close()
+	return res
+}
+
+func SignOut(userToken string) entity.Result {
+	lang := lang.Lang()
+	_, _, tx, db := model.ConnDB()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+	}
+
+	if userToken == "" {
+		tx.Rollback()
+		res.Message = lang.Typo
+		return res
+	}
+
+	b, s, userData := model.UserDataToken(tx, userToken)
+	if userData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.NoData
+		return res
+	}
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	userData.UserToken = ""
+	b, s, _ = model.UserUpdate(tx, userData)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	// 写入日志
+	b, s = lib.WriteLog(userData.Account, userData.Account+" logout")
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	tx.Commit()
+	res.State = true
+
+	db.Close()
+	return res
+}
+
+func UserList(userToken string, page string, pageSize string, order string, account string, name string, level string, status string) entity.ResultList {
+	lang := lang.Lang()
+	res := entity.ResultList{
+		State:     false,
+		Code:      200,
+		Message:   "",
+		Page:      0,
+		PageSize:  0,
+		TotalPage: 0,
+		Data:      nil,
+	}
+
+	permissions := CheckLevel(userToken)
+	if permissions != 2 {
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+	_, _, pageInt := lib.StringToInt(page)
+	_, _, pageSizeInt := lib.StringToInt(pageSize)
+	_, _, orderInt := lib.StringToInt(order)
+	_, _, levelInt := lib.StringToInt(level)
+	_, _, statusInt := lib.StringToInt(status)
+	p, ps, t, list := model.UserList(tx, pageInt, pageSizeInt, orderInt, account, name, levelInt, statusInt)
+
+	res.State = true
+	res.Page = p
+	res.PageSize = ps
+	res.TotalPage = t
+	res.Data = list
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
+func Users(userToken string, order string, account string, name string, level string, status string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	permissions := CheckLevel(userToken)
+	if permissions != 2 {
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+	_, _, orderInt := lib.StringToInt(order)
+	_, _, levelInt := lib.StringToInt(level)
+	_, _, statusInt := lib.StringToInt(status)
+	list := model.Users(tx, orderInt, account, name, levelInt, statusInt)
+
+	res.State = true
+	res.Code = 200
+	res.Message = ""
+	res.Data = list
+
+	tx.Commit()
 	db.Close()
 	return res
 }
