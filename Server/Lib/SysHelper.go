@@ -144,6 +144,30 @@ func StringContains(data string, subs string) bool {
 	return strings.Contains(data, subs)
 }
 
+func LogDir() string {
+	return "../Log/" + strings.Split(TimeNowStr(), " ")[0] + "/"
+}
+
+func WriteLog(fileName string, content string) (bool, string) {
+	if !FileExist(LogDir()) {
+		b, s := DirMake(LogDir())
+		if !b {
+			return false, s
+		}
+	}
+	if !FileExist(LogDir() + fileName) {
+		b, s := FileMake(LogDir() + fileName)
+		if !b {
+			return false, s
+		}
+	}
+	b, s := FileWriteAppend(LogDir()+fileName, TimeNowStr()+" "+content+""+"\n")
+	if !b {
+		return false, s
+	}
+	return true, ""
+}
+
 /*
 CBC 加密
 data 待加密的明文

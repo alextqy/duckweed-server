@@ -8,13 +8,13 @@ import (
 	"math"
 )
 
-func UserCount(db *sql.DB) int {
+func UserCount(db *sql.Tx) int {
 	var count int
 	db.QueryRow("SELECT COUNT(*) FROM User").Scan(&count)
 	return count
 }
 
-func UserAdd(db *sql.DB, data entity.UserEntity) (bool, string, int) {
+func UserAdd(db *sql.Tx, data entity.UserEntity) (bool, string, int) {
 	sqlCom := "INSERT INTO User(Account,Name,Password,Level,Status,AvailableSpace,Createtime) VALUES(?,?,?,?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -33,16 +33,16 @@ func UserAdd(db *sql.DB, data entity.UserEntity) (bool, string, int) {
 	return true, "", int(id)
 }
 
-func UserUpdate(db *sql.DB, id string, data entity.UserEntity) (bool, string, int) {
-	sqlCom := "UPDATE User SET Account=?,Name=?,Password=?,Level=?,Status=?,AvailableSpace=? WHERE ID=?"
+func UserUpdate(db *sql.Tx, data entity.UserEntity) (bool, string, int) {
+	sqlCom := "UPDATE User SET Account=?,Name=?,Password=?,Level=?,Status=?,AvailableSpace=?,UsedSpace=?,UserToken=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	if data.Password != "" {
-		data.Password = lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Password + lib.IntToString(data.Createtime)))
-	}
-	res, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, id)
+	// if data.Password != "" {
+	// 	data.Password = lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Password + lib.IntToString(data.Createtime)))
+	// }
+	res, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, data.UsedSpace, data.UserToken, data.ID)
 	if err != nil {
 		return false, err.Error(), 0
 	}
@@ -53,7 +53,7 @@ func UserUpdate(db *sql.DB, id string, data entity.UserEntity) (bool, string, in
 	return true, "", int(affect)
 }
 
-func UserData(db *sql.DB, id string) (bool, string, entity.UserEntity) {
+func UserData(db *sql.Tx, id string) (bool, string, entity.UserEntity) {
 	data := entity.UserEntity{}
 	sqlCom := "SELECT * FROM User WHERE ID=" + id
 	rows, err := db.Query(sqlCom)
@@ -61,7 +61,7 @@ func UserData(db *sql.DB, id string) (bool, string, entity.UserEntity) {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.Createtime)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -70,16 +70,15 @@ func UserData(db *sql.DB, id string) (bool, string, entity.UserEntity) {
 	return true, "", data
 }
 
-func UserDataAccount(db *sql.DB, account string) (bool, string, entity.UserEntity) {
+func UserDataAccount(db *sql.Tx, account string) (bool, string, entity.UserEntity) {
 	data := entity.UserEntity{}
 	sqlCom := "SELECT * FROM User WHERE Account='" + account + "'"
-	fmt.Println(sqlCom)
 	rows, err := db.Query(sqlCom)
 	if err != nil {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.Createtime)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -87,7 +86,7 @@ func UserDataAccount(db *sql.DB, account string) (bool, string, entity.UserEntit
 	return true, "", data
 }
 
-func Users(db *sql.DB, order int, account string, name string, level int, status int) []entity.UserEntity {
+func Users(db *sql.Tx, order int, account string, name string, level int, status int) []entity.UserEntity {
 	datas := []entity.UserEntity{}
 	condition_account := "1=1"
 	condition_name := "1=1"
@@ -120,7 +119,7 @@ func Users(db *sql.DB, order int, account string, name string, level int, status
 	}
 	for rows.Next() {
 		data := entity.UserEntity{}
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.Createtime)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
 		if err != nil {
 			fmt.Println(err.Error())
 			return nil
@@ -135,7 +134,7 @@ func Users(db *sql.DB, order int, account string, name string, level int, status
 	return datas
 }
 
-func UserList(db *sql.DB, page int, pageSize int, order int, account string, name string, level int, status int) (int, int, int, []entity.UserEntity) {
+func UserList(db *sql.Tx, page int, pageSize int, order int, account string, name string, level int, status int) (int, int, int, []entity.UserEntity) {
 	datas := []entity.UserEntity{}
 	condition_account := "1=1"
 	condition_name := "1=1"
@@ -178,7 +177,7 @@ func UserList(db *sql.DB, page int, pageSize int, order int, account string, nam
 	}
 	for rows.Next() {
 		data := entity.UserEntity{}
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.Createtime)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
 		if err != nil {
 			fmt.Println(err.Error())
 			return 0, 0, 0, nil
@@ -194,7 +193,7 @@ func UserList(db *sql.DB, page int, pageSize int, order int, account string, nam
 	return page, pageSize, int(totalPage), datas
 }
 
-func UserDel(db *sql.DB, id string) (bool, string, int) {
+func UserDel(db *sql.Tx, id string) (bool, string, int) {
 	if lib.StringContains(id, ",") {
 		res, err := db.Exec("DELETE FROM User WHERE ID IN (" + id + ")")
 		if err != nil {

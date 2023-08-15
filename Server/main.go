@@ -31,8 +31,9 @@ func main() {
 		}
 	}
 
-	// 开启内网广播
 	go loopBroadcast(ips[len(ips)-1], confEntity.UdpPort)
+	go systemLog()
+	go space()
 
 	mux := http.NewServeMux()
 	routes(mux)
@@ -46,19 +47,35 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func routes(mux *http.ServeMux) {
-	mux.HandleFunc("/test", api.Test)
-	mux.HandleFunc("/users", api.Users)
-	mux.HandleFunc("/user/list", api.UserList)
-	mux.HandleFunc("/user/get", api.UserGet)
-	mux.HandleFunc("/user/check", api.UserCheck)
-	mux.HandleFunc("/user/del", api.UserDel)
-	mux.HandleFunc("/user/login", api.UserLogin)
-}
-
+// 开启内网广播
 func loopBroadcast(ip string, port string) {
 	for {
 		lib.Broadcast(port, ip+":"+port)
 		time.Sleep(time.Second)
 	}
+}
+
+// 系统日志
+func systemLog() {
+	for {
+		if !lib.FileExist(lib.LogDir()) {
+			lib.DirMake(lib.LogDir())
+		}
+		time.Sleep(time.Second)
+	}
+}
+
+// 用户空间
+func space() {
+	for {
+		if !lib.FileExist("../Space") {
+			lib.DirMake("../Space")
+		}
+		time.Sleep(time.Second)
+	}
+}
+
+func routes(mux *http.ServeMux) {
+	mux.HandleFunc("/test", api.Test)
+	mux.HandleFunc("/user/login", api.UserLogin)
 }

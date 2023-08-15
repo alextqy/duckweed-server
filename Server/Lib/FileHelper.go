@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 )
 
@@ -53,23 +53,11 @@ func Filespec(filePath string) (bool, os.FileInfo) {
 }
 
 func FileRead(filePath string) (bool, string) {
-	f, err := os.OpenFile(filePath, os.O_RDONLY, 0600)
-
-	defer func(f io.Closer) {
-		if err := f.Close(); err != nil {
-			fmt.Printf("defer close file err: %v", err.Error())
-		}
-	}(f)
-
-	if err != nil {
-		return false, err.Error()
-	} else {
-		contentByte, readErr := ioutil.ReadAll(f)
-		if readErr != nil {
-			return false, readErr.Error()
-		}
-		return true, string(contentByte)
+	contentByte, readErr := os.ReadFile(filePath)
+	if readErr != nil {
+		return false, readErr.Error()
 	}
+	return true, string(contentByte)
 }
 
 func FileWrite(filePath string, content string) (bool, string) {
@@ -121,8 +109,8 @@ func DirMake(dirPath string) (bool, string) {
 	}
 }
 
-func DirCheck(dirPath string) (bool, string, []os.FileInfo) {
-	files, err := ioutil.ReadDir(dirPath)
+func DirCheck(dirPath string) (bool, string, []fs.DirEntry) {
+	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		return false, err.Error(), nil
 	}

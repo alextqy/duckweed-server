@@ -35,7 +35,7 @@ func FormFile(w http.ResponseWriter, r *http.Request, key string) (bool, string)
 		return false, err.Error()
 	}
 
-	newf, err := os.OpenFile("./Temp/upload/"+fheader.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	newf, err := os.OpenFile("../Temp/upload/"+fheader.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return false, err.Error()
 	}
