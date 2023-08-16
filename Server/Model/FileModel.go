@@ -8,13 +8,13 @@ import (
 	"math"
 )
 
-func FileCount(db *sql.DB) int {
+func FileCount(db *sql.Tx) int {
 	var count int
 	db.QueryRow("SELECT COUNT(*) FROM File").Scan(&count)
 	return count
 }
 
-func FileAdd(db *sql.DB, data entity.FileEntity) (bool, string, int) {
+func FileAdd(db *sql.Tx, data entity.FileEntity) (bool, string, int) {
 	sqlCom := "INSERT INTO File(FileName,FileType,FileSize,StoragePath,MD5,UserID,DirID,Createtime) VALUES(?,?,?,?,?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -32,7 +32,7 @@ func FileAdd(db *sql.DB, data entity.FileEntity) (bool, string, int) {
 	return true, "", int(id)
 }
 
-func FileUpdate(db *sql.DB, id string, data entity.FileEntity) (bool, string, int) {
+func FileUpdate(db *sql.Tx, id string, data entity.FileEntity) (bool, string, int) {
 	sqlCom := "UPDATE File SET FileName=?,FileType=?,FileSize=?,StoragePath=?,MD5=?,UserID=?,DirID=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -49,7 +49,7 @@ func FileUpdate(db *sql.DB, id string, data entity.FileEntity) (bool, string, in
 	return true, "", int(affect)
 }
 
-func FileData(db *sql.DB, id string) (bool, string, entity.FileEntity) {
+func FileData(db *sql.Tx, id string) (bool, string, entity.FileEntity) {
 	data := entity.FileEntity{}
 	sqlCom := "SELECT * FROM File WHERE ID=" + id
 	rows, err := db.Query(sqlCom)
@@ -65,7 +65,7 @@ func FileData(db *sql.DB, id string) (bool, string, entity.FileEntity) {
 	return true, "", data
 }
 
-func Files(db *sql.DB, order int, fileName string, userID int, dirID int) []entity.FileEntity {
+func Files(db *sql.Tx, order int, fileName string, userID int, dirID int) []entity.FileEntity {
 	datas := []entity.FileEntity{}
 	condition_fileName := "1=1"
 	condition_userID := "1=1"
@@ -103,7 +103,7 @@ func Files(db *sql.DB, order int, fileName string, userID int, dirID int) []enti
 	return datas
 }
 
-func FileList(db *sql.DB, page int, pageSize int, order int, fileName string, userID int, dirID int) (int, int, int, []entity.FileEntity) {
+func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, userID int, dirID int) (int, int, int, []entity.FileEntity) {
 	datas := []entity.FileEntity{}
 	condition_fileName := "1=1"
 	condition_userID := "1=1"
@@ -152,7 +152,7 @@ func FileList(db *sql.DB, page int, pageSize int, order int, fileName string, us
 	return page, pageSize, int(totalPage), datas
 }
 
-func FileDel(db *sql.DB, id string) (bool, string, int) {
+func FileDel(db *sql.Tx, id string) (bool, string, int) {
 	if lib.StringContains(id, ",") {
 		res, err := db.Exec("DELETE FROM File WHERE ID IN (" + id + ")")
 		if err != nil {
@@ -179,4 +179,21 @@ func FileDel(db *sql.DB, id string) (bool, string, int) {
 		}
 		return true, "", int(affect)
 	}
+}
+
+func FileDelUser(db *sql.Tx, userID string) (bool, string, int) {
+	sqlCom := "DELETE FROM File WHERE UserID=?"
+	stmt, err := db.Prepare(sqlCom)
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	res, err := stmt.Exec(userID)
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	return true, "", int(affect)
 }

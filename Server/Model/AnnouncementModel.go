@@ -8,13 +8,13 @@ import (
 	"math"
 )
 
-func AnnouncementCount(db *sql.DB) int {
+func AnnouncementCount(db *sql.Tx) int {
 	var count int
 	db.QueryRow("SELECT COUNT(*) FROM Announcement").Scan(&count)
 	return count
 }
 
-func AnnouncementAdd(db *sql.DB, data entity.AnnouncementEntity) (bool, string, int) {
+func AnnouncementAdd(db *sql.Tx, data entity.AnnouncementEntity) (bool, string, int) {
 	sqlCom := "INSERT INTO Announcement(Content,Createtime) VALUES(?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -32,7 +32,7 @@ func AnnouncementAdd(db *sql.DB, data entity.AnnouncementEntity) (bool, string, 
 	return true, "", int(id)
 }
 
-func AnnouncementUpdate(db *sql.DB, id string, data entity.AnnouncementEntity) (bool, string, int) {
+func AnnouncementUpdate(db *sql.Tx, id string, data entity.AnnouncementEntity) (bool, string, int) {
 	sqlCom := "UPDATE Announcement SET Content=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -49,7 +49,7 @@ func AnnouncementUpdate(db *sql.DB, id string, data entity.AnnouncementEntity) (
 	return true, "", int(affect)
 }
 
-func AnnouncementData(db *sql.DB, id string) (bool, string, entity.AnnouncementEntity) {
+func AnnouncementData(db *sql.Tx, id string) (bool, string, entity.AnnouncementEntity) {
 	data := entity.AnnouncementEntity{}
 	sqlCom := "SELECT * FROM Announcement WHERE ID=" + id
 	rows, err := db.Query(sqlCom)
@@ -65,7 +65,7 @@ func AnnouncementData(db *sql.DB, id string) (bool, string, entity.AnnouncementE
 	return true, "", data
 }
 
-func Announcements(db *sql.DB, order int) []entity.AnnouncementEntity {
+func Announcements(db *sql.Tx, order int) []entity.AnnouncementEntity {
 	datas := []entity.AnnouncementEntity{}
 	orderBy := ""
 	if order == -1 {
@@ -91,7 +91,7 @@ func Announcements(db *sql.DB, order int) []entity.AnnouncementEntity {
 	return datas
 }
 
-func AnnouncementList(db *sql.DB, page int, pageSize int, order int, content string) (int, int, int, []entity.AnnouncementEntity) {
+func AnnouncementList(db *sql.Tx, page int, pageSize int, order int, content string) (int, int, int, []entity.AnnouncementEntity) {
 	datas := []entity.AnnouncementEntity{}
 	if page <= 1 {
 		page = 1
@@ -127,7 +127,7 @@ func AnnouncementList(db *sql.DB, page int, pageSize int, order int, content str
 	return page, pageSize, int(totalPage), datas
 }
 
-func AnnouncementDel(db *sql.DB, id string) (bool, string, int) {
+func AnnouncementDel(db *sql.Tx, id string) (bool, string, int) {
 	if lib.StringContains(id, ",") {
 		res, err := db.Exec("DELETE FROM Announcement WHERE ID IN (" + id + ")")
 		if err != nil {

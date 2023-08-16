@@ -8,13 +8,13 @@ import (
 	"math"
 )
 
-func DirCount(db *sql.DB) int {
+func DirCount(db *sql.Tx) int {
 	var count int
 	db.QueryRow("SELECT COUNT(*) FROM Dir").Scan(&count)
 	return count
 }
 
-func DirAdd(db *sql.DB, data entity.DirEntity) (bool, string, int) {
+func DirAdd(db *sql.Tx, data entity.DirEntity) (bool, string, int) {
 	sqlCom := "INSERT INTO Dir(DirName,ParentID,UserID,Createtime) VALUES(?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -32,7 +32,7 @@ func DirAdd(db *sql.DB, data entity.DirEntity) (bool, string, int) {
 	return true, "", int(id)
 }
 
-func DirUpdate(db *sql.DB, id string, data entity.DirEntity) (bool, string, int) {
+func DirUpdate(db *sql.Tx, id string, data entity.DirEntity) (bool, string, int) {
 	sqlCom := "UPDATE Dir SET DirName=?,ParentID=?,UserID=?,Createtime=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -49,7 +49,7 @@ func DirUpdate(db *sql.DB, id string, data entity.DirEntity) (bool, string, int)
 	return true, "", int(affect)
 }
 
-func DirData(db *sql.DB, id string) (bool, string, entity.DirEntity) {
+func DirData(db *sql.Tx, id string) (bool, string, entity.DirEntity) {
 	data := entity.DirEntity{}
 	sqlCom := "SELECT * FROM Dir WHERE ID=" + id
 	rows, err := db.Query(sqlCom)
@@ -65,7 +65,7 @@ func DirData(db *sql.DB, id string) (bool, string, entity.DirEntity) {
 	return true, "", data
 }
 
-func Dirs(db *sql.DB, order int, dirName string, parentID int, userID int) []entity.DirEntity {
+func Dirs(db *sql.Tx, order int, dirName string, parentID int, userID int) []entity.DirEntity {
 	datas := []entity.DirEntity{}
 	condition_dirName := "1=1"
 	condition_parentID := "1=1"
@@ -103,7 +103,7 @@ func Dirs(db *sql.DB, order int, dirName string, parentID int, userID int) []ent
 	return datas
 }
 
-func DirList(db *sql.DB, page int, pageSize int, order int, dirName string, parentID int, userID int) (int, int, int, []entity.DirEntity) {
+func DirList(db *sql.Tx, page int, pageSize int, order int, dirName string, parentID int, userID int) (int, int, int, []entity.DirEntity) {
 	datas := []entity.DirEntity{}
 	condition_dirName := "1=1"
 	condition_parentID := "1=1"
@@ -152,7 +152,7 @@ func DirList(db *sql.DB, page int, pageSize int, order int, dirName string, pare
 	return page, pageSize, int(totalPage), datas
 }
 
-func DirDel(db *sql.DB, id string) (bool, string, int) {
+func DirDel(db *sql.Tx, id string) (bool, string, int) {
 	if lib.StringContains(id, ",") {
 		res, err := db.Exec("DELETE FROM Dir WHERE ID IN (" + id + ")")
 		if err != nil {
@@ -179,4 +179,21 @@ func DirDel(db *sql.DB, id string) (bool, string, int) {
 		}
 		return true, "", int(affect)
 	}
+}
+
+func DirDelUser(db *sql.Tx, userID string) (bool, string, int) {
+	sqlCom := "DELETE FROM Dir WHERE UserID=?"
+	stmt, err := db.Prepare(sqlCom)
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	res, err := stmt.Exec(userID)
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	return true, "", int(affect)
 }

@@ -116,3 +116,11 @@ func DirCheck(dirPath string) (bool, string, []fs.DirEntry) {
 	}
 	return true, "", files
 }
+
+func DirDel(dirPath string) (bool, string) {
+	err := os.RemoveAll(dirPath)
+	if err != nil {
+		return false, err.Error()
+	}
+	return true, ""
+}

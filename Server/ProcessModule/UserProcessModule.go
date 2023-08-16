@@ -7,26 +7,6 @@ import (
 	model "duckweed-server/Server/Model"
 )
 
-/*
-func UserDel(id string) entity.Result {
-	_, _, db := model.ConnDB()
-	res := entity.Result{
-		State:   true,
-		Code:    200,
-		Message: "",
-	}
-	b, s, r := model.UserDel(db, id)
-	if !b {
-		res.State = false
-		res.Message = s
-	} else {
-		res.Data = r
-	}
-	db.Close()
-	return res
-}
-*/
-
 func SignIn(account string, password string) entity.Result {
 	lang := lang.Lang()
 	_, _, tx, db := model.ConnDB()
@@ -323,6 +303,7 @@ func UserAction(userToken string, account string, name string, password string, 
 	user.Name = name
 	user.Level = levelInt
 	user.AvailableSpace = availableSpaceInt
+	user.Createtime = int(lib.TimeStamp())
 
 	_, _, tx, db := model.ConnDB()
 
@@ -341,6 +322,11 @@ func UserAction(userToken string, account string, name string, password string, 
 
 		user.ID = idInt
 		b, s, r = model.UserUpdate(tx, user)
+		if r == 0 {
+			tx.Rollback()
+			res.Message = lang.OperationFailed
+			return res
+		}
 	} else {
 		// 检查重复账号
 		_, _, checkAccount := model.UserDataAccount(tx, account)
@@ -352,6 +338,11 @@ func UserAction(userToken string, account string, name string, password string, 
 
 		user.Password = password
 		b, s, r = model.UserAdd(tx, user)
+		if r == 0 {
+			tx.Rollback()
+			res.Message = lang.OperationFailed
+			return res
+		}
 	}
 
 	if !b {
@@ -369,6 +360,82 @@ func UserAction(userToken string, account string, name string, password string, 
 	tx.Commit()
 	res.State = true
 	res.Data = r
+
+	db.Close()
+	return res
+}
+
+func UserDel(userToken string, id string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	permissions, adminAccount := CheckLevel(userToken)
+	if permissions != 2 {
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, userData := model.UserData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if userData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.NoData
+		return res
+	}
+
+	// 删除用户文件夹数据
+	b, s, _ = model.DirDelUser(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	// 删除用户文件数据
+	b, s, _ = model.FileDelUser(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	// 删除用户数据
+	b, s, _ = model.UserDel(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	// 删除用户磁盘目录
+	userDir := "../Space/" + userData.Account
+	b, s = lib.DirDel(userDir)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	lib.WriteLog(adminAccount, adminAccount+" delete user data account: "+userData.Account)
+
+	tx.Commit()
+	res.State = true
 
 	db.Close()
 	return res

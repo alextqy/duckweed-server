@@ -22,6 +22,7 @@ type language struct {
 	NicknameFormatError              string
 	IncorrectLevel                   string
 	TheFreeSpaceSizeIsSetIncorrectly string
+	OperationFailed                  string
 }
 
 func Lang() language {
@@ -46,6 +47,7 @@ func Lang() language {
 		l.NicknameFormatError = "昵称格式错误"
 		l.IncorrectLevel = "等级错误"
 		l.TheFreeSpaceSizeIsSetIncorrectly = "可用空间设置错误"
+		l.OperationFailed = "操作失败"
 	} else if confEntity.Lang == "en" {
 		l.NoData = "no data"
 		l.IncorrectPassword = "incorrect password"
@@ -62,6 +64,7 @@ func Lang() language {
 		l.NicknameFormatError = "nick name format error"
 		l.IncorrectLevel = "incorrect level"
 		l.TheFreeSpaceSizeIsSetIncorrectly = "the free space size is set incorrectly"
+		l.OperationFailed = "operation failed"
 	} else {
 		l.NoData = ""
 		l.IncorrectPassword = ""
@@ -78,6 +81,7 @@ func Lang() language {
 		l.NicknameFormatError = ""
 		l.IncorrectLevel = ""
 		l.TheFreeSpaceSizeIsSetIncorrectly = ""
+		l.OperationFailed = ""
 	}
 	return l
 }
