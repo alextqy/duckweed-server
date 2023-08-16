@@ -20,8 +20,10 @@ func UserAdd(db *sql.Tx, data entity.UserEntity) (bool, string, int) {
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	data.Createtime = int(lib.TimeStamp())
 	data.Password = lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Password + lib.IntToString(data.Createtime)))
+	data.Status = 1
+	data.UsedSpace = 0
+	data.Createtime = int(lib.TimeStamp())
 	row, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, data.Createtime)
 	if err != nil {
 		return false, err.Error(), 0
@@ -39,9 +41,6 @@ func UserUpdate(db *sql.Tx, data entity.UserEntity) (bool, string, int) {
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	// if data.Password != "" {
-	// 	data.Password = lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Password + lib.IntToString(data.Createtime)))
-	// }
 	res, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, data.UsedSpace, data.UserToken, data.ID)
 	if err != nil {
 		return false, err.Error(), 0

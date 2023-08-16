@@ -2,17 +2,17 @@ package processmodule
 
 import (
 	entity "duckweed-server/Server/Entity"
-	lib "duckweed-server/Server/Lib"
 )
 
 func Test(text string) entity.Result {
-	_, _, encrypted := lib.AesEncrypterCBC(text, "aaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb")
-	_, _, decrypted := lib.AesDecrypterCBC(encrypted, "aaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb")
+	// _, _, encrypted := lib.AesEncrypterCBC(text, "aaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb")
+	// _, _, decrypted := lib.AesDecrypterCBC(encrypted, "aaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb")
+	// compile := lib.RegEnNum(text)
 	res := entity.Result{
 		State:   true,
 		Code:    200,
 		Message: "succeed",
-		Data:    decrypted,
+		Data:    nil,
 	}
 	return res
 }

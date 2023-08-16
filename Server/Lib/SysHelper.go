@@ -8,8 +8,10 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"net"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -155,13 +157,14 @@ func WriteLog(fileName string, content string) (bool, string) {
 			return false, s
 		}
 	}
-	if !FileExist(LogDir() + fileName) {
-		b, s := FileMake(LogDir() + fileName)
+	logFile := LogDir() + fileName + ".log"
+	if !FileExist(logFile) {
+		b, s := FileMake(logFile)
 		if !b {
 			return false, s
 		}
 	}
-	b, s := FileWriteAppend(LogDir()+fileName, TimeNowStr()+" "+content+""+"\n")
+	b, s := FileWriteAppend(logFile, TimeNowStr()+" "+content+""+"\n")
 	if !b {
 		return false, s
 	}
@@ -215,4 +218,54 @@ func AesDecrypterCBC(data_s string, key_s string, iv_s string) (bool, string, st
 	blockMode.CryptBlocks(result, data)
 	unPadding := int(result[len(result)-1])
 	return true, "", string(result[:(len(result) - unPadding)])
+}
+
+// 大小写英文字母
+func RegEn(s string) bool {
+	r, err := regexp.Compile("^[a-zA-Z]+$")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return r.MatchString(s)
+}
+
+// 数字
+func RegNum(s string) bool {
+	r, err := regexp.Compile("^[0-9]*$")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return r.MatchString(s)
+}
+
+// 中文
+func RegZh(s string) bool {
+	r, err := regexp.Compile("[\u4e00-\u9fa5]")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return r.MatchString(s)
+}
+
+// 英文 数字
+func RegEnNum(s string) bool {
+	r, err := regexp.Compile("^[a-zA-Z0-9]+$")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return r.MatchString(s)
+}
+
+// 中英文 数字 下划线 短横线
+func RegAll(s string) bool {
+	r, err := regexp.Compile("^[\u4e00-\u9fa5_a-zA-Z0-9-]+$")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return r.MatchString(s)
 }

@@ -8,46 +8,6 @@ import (
 )
 
 /*
-func UserCheck(account string, name string, password string, level string, availableSpace string, id string) entity.Result {
-	_, _, db := model.ConnDB()
-	res := entity.Result{
-		State:   true,
-		Code:    200,
-		Message: "",
-	}
-	_, _, levelInt := lib.StringToInt(level)
-	_, _, availableSpaceInt := lib.StringToInt(availableSpace)
-	user := entity.UserEntity{
-		Account:        account,
-		Name:           name,
-		Password:       password,
-		Level:          levelInt,
-		Status:         1,
-		AvailableSpace: availableSpaceInt,
-	}
-
-	var b bool
-	var s string
-	var r int
-	_, _, idInt := lib.StringToInt(id)
-	if idInt > 0 {
-		b, s, r = model.UserUpdate(db, id, user)
-	} else {
-		b, s, r = model.UserAdd(db, user)
-	}
-
-	if !b {
-		res.State = false
-		res.Message = s
-	} else {
-		res.Data = r
-	}
-
-	res.Data = r
-	db.Close()
-	return res
-}
-
 func UserDel(id string) entity.Result {
 	_, _, db := model.ConnDB()
 	res := entity.Result{
@@ -200,7 +160,7 @@ func UserList(userToken string, page string, pageSize string, order string, acco
 		Data:      nil,
 	}
 
-	permissions := CheckLevel(userToken)
+	permissions, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -234,7 +194,7 @@ func Users(userToken string, order string, account string, name string, level st
 		Data:    nil,
 	}
 
-	permissions := CheckLevel(userToken)
+	permissions, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -265,7 +225,7 @@ func UserGet(userToken string, id string) entity.Result {
 		Data:    nil,
 	}
 
-	permissions := CheckLevel(userToken)
+	permissions, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -285,6 +245,129 @@ func UserGet(userToken string, id string) entity.Result {
 	}
 
 	tx.Commit()
+	res.Data = r
+
+	db.Close()
+	return res
+}
+
+func UserAction(userToken string, account string, name string, password string, level string, availableSpace string, id string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	permissions, adminAccount := CheckLevel(userToken)
+	if permissions != 2 {
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	_, _, levelInt := lib.StringToInt(level)
+	_, _, availableSpaceInt := lib.StringToInt(availableSpace)
+
+	if account == "" {
+		res.Message = lang.IncorrectAccount
+		return res
+	}
+	if len(account) < 6 {
+		res.Message = lang.AccountLengthIsNotEnough
+		return res
+	}
+	if !lib.RegEn(account) {
+		res.Message = lang.AccountFormatError
+		return res
+	}
+	if name == "" {
+		res.Message = lang.IncorrectName
+		return res
+	}
+	if !lib.RegAll(name) {
+		res.Message = lang.NicknameFormatError
+		return res
+	}
+	if password == "" {
+		res.Message = lang.IncorrectPassword
+		return res
+	}
+	if len(password) < 6 {
+		res.Message = lang.PasswordLengthIsNotEnough
+		return res
+	}
+	if !lib.RegEnNum(password) {
+		res.Message = lang.PasswordFormatError
+		return res
+	}
+	if level == "" {
+		res.Message = lang.IncorrectLevel
+		return res
+	}
+	if levelInt != 1 && levelInt != 2 {
+		res.Message = lang.IncorrectLevel
+		return res
+	}
+	if availableSpace == "" {
+		res.Message = lang.TheFreeSpaceSizeIsSetIncorrectly
+		return res
+	}
+	if availableSpaceInt < 0 {
+		res.Message = lang.TheFreeSpaceSizeIsSetIncorrectly
+		return res
+	}
+
+	user := entity.UserEntity{}
+	user.Account = account
+	user.Name = name
+	user.Level = levelInt
+	user.AvailableSpace = availableSpaceInt
+
+	_, _, tx, db := model.ConnDB()
+
+	var b bool
+	var s string
+	var r int
+	_, _, idInt := lib.StringToInt(id)
+	if idInt > 0 {
+		if user.ID == 1 {
+			user.Level = 2
+			user.Status = 1
+		}
+		if user.Password != password {
+			user.Password = lib.MD5(lib.MD5(lib.IntToString(user.Createtime) + password + lib.IntToString(user.Createtime)))
+		}
+
+		user.ID = idInt
+		b, s, r = model.UserUpdate(tx, user)
+	} else {
+		// 检查重复账号
+		_, _, checkAccount := model.UserDataAccount(tx, account)
+		if checkAccount.ID > 0 {
+			tx.Rollback()
+			res.Message = lang.AccountAlreadyExists
+			return res
+		}
+
+		user.Password = password
+		b, s, r = model.UserAdd(tx, user)
+	}
+
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	if idInt > 0 {
+		lib.WriteLog(adminAccount, adminAccount+" update user data account: "+account)
+	} else {
+		lib.WriteLog(adminAccount, adminAccount+" new user account: "+account)
+	}
+
+	tx.Commit()
+	res.State = true
 	res.Data = r
 
 	db.Close()

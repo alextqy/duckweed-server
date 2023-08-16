@@ -7,14 +7,11 @@ import (
 )
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
-	account := strings.TrimSpace(Post(r, "account"))
-	password := strings.TrimSpace(Post(r, "password"))
-	HttpWrite(w, processmodule.SignIn(account, password))
+	HttpWrite(w, processmodule.SignIn(strings.TrimSpace(Post(r, "account")), strings.TrimSpace(Post(r, "password"))))
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
-	userToken := strings.TrimSpace(Post(r, "userToken"))
-	HttpWrite(w, processmodule.SignOut(userToken))
+	HttpWrite(w, processmodule.SignOut(strings.TrimSpace(Post(r, "userToken"))))
 }
 
 func UserList(w http.ResponseWriter, r *http.Request) {
@@ -41,4 +38,15 @@ func Users(w http.ResponseWriter, r *http.Request) {
 
 func UserGet(w http.ResponseWriter, r *http.Request) {
 	HttpWrite(w, processmodule.UserGet(strings.TrimSpace(Post(r, "userToken")), strings.TrimSpace(Post(r, "id"))))
+}
+
+func UserAction(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	account := strings.TrimSpace(Post(r, "account"))
+	name := strings.TrimSpace(Post(r, "name"))
+	password := strings.TrimSpace(Post(r, "password"))
+	level := strings.TrimSpace(Post(r, "level"))
+	availableSpace := strings.TrimSpace(Post(r, "availableSpace"))
+	id := strings.TrimSpace(Post(r, "id"))
+	HttpWrite(w, processmodule.UserAction(userToken, account, name, password, level, availableSpace, id))
 }
