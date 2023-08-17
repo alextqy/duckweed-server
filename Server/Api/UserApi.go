@@ -60,3 +60,10 @@ func UserDel(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimSpace(Post(r, "id"))
 	HttpWrite(w, processmodule.UserDel(userToken, id))
 }
+
+func SignUp(w http.ResponseWriter, r *http.Request) {
+	account := strings.TrimSpace(Post(r, "account"))
+	name := strings.TrimSpace(Post(r, "name"))
+	password := strings.TrimSpace(Post(r, "password"))
+	HttpWrite(w, processmodule.SignUp(account, name, password))
+}

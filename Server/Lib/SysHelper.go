@@ -5,9 +5,11 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/md5"
+	entity "duckweed-server/Server/Entity"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -24,7 +26,6 @@ func GetEnv(key string) string {
 func LocalIP() (bool, string, []string) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-
 		return false, err.Error(), nil
 	} else {
 		var ips []string
@@ -50,7 +51,6 @@ func ByteToString(data []byte) string {
 func StringToInt(data string) (bool, string, int) {
 	res, err := strconv.Atoi(data)
 	if err != nil {
-
 		return false, err.Error(), 0
 	} else {
 		return true, "", res
@@ -60,7 +60,6 @@ func StringToInt(data string) (bool, string, int) {
 func StringToInt64(data string) (bool, string, int64) {
 	res, err := strconv.ParseInt(data, 10, 64)
 	if err != nil {
-
 		return false, err.Error(), 0
 	} else {
 		return true, "", res
@@ -78,7 +77,6 @@ func Int64ToString(data int64) string {
 func StringToFloat64(data string) (bool, string, float64) {
 	s, err := strconv.ParseFloat(data, 64)
 	if err != nil {
-
 		return false, err.Error(), 0
 	} else {
 		return true, "", s
@@ -136,7 +134,6 @@ func EnBase64(s string) string {
 func DeBase64(s64 string) (bool, string, string) {
 	decoded, err := base64.StdEncoding.DecodeString(s64)
 	if err != nil {
-
 		return false, err.Error(), ""
 	}
 	return true, "", string(decoded)
@@ -144,31 +141,6 @@ func DeBase64(s64 string) (bool, string, string) {
 
 func StringContains(data string, subs string) bool {
 	return strings.Contains(data, subs)
-}
-
-func LogDir() string {
-	return "../Log/" + strings.Split(TimeNowStr(), " ")[0] + "/"
-}
-
-func WriteLog(fileName string, content string) (bool, string) {
-	if !FileExist(LogDir()) {
-		b, s := DirMake(LogDir())
-		if !b {
-			return false, s
-		}
-	}
-	logFile := LogDir() + fileName + ".log"
-	if !FileExist(logFile) {
-		b, s := FileMake(logFile)
-		if !b {
-			return false, s
-		}
-	}
-	b, s := FileWriteAppend(logFile, TimeNowStr()+" "+content+""+"\n")
-	if !b {
-		return false, s
-	}
-	return true, ""
 }
 
 /*
@@ -278,4 +250,36 @@ func RegAll(s string) bool {
 		return false
 	}
 	return r.MatchString(s)
+}
+
+func LogDir() string {
+	return "../Log/" + strings.Split(TimeNowStr(), " ")[0] + "/"
+}
+
+func WriteLog(fileName string, content string) (bool, string) {
+	if !FileExist(LogDir()) {
+		b, s := DirMake(LogDir())
+		if !b {
+			return false, s
+		}
+	}
+	logFile := LogDir() + fileName + ".log"
+	if !FileExist(logFile) {
+		b, s := FileMake(logFile)
+		if !b {
+			return false, s
+		}
+	}
+	b, s := FileWriteAppend(logFile, TimeNowStr()+" "+content+""+"\n")
+	if !b {
+		return false, s
+	}
+	return true, ""
+}
+
+func CheckConf() entity.ConfEntity {
+	var confEntity entity.ConfEntity
+	_, byteData := FileRead("./Conf.json")
+	json.Unmarshal([]byte(byteData), &confEntity)
+	return confEntity
 }

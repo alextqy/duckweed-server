@@ -257,7 +257,7 @@ func UserAction(userToken string, account string, name string, password string, 
 		res.Message = lang.AccountLengthIsNotEnough
 		return res
 	}
-	if !lib.RegEn(account) {
+	if !lib.RegEnNum(account) {
 		res.Message = lang.AccountFormatError
 		return res
 	}
@@ -436,6 +436,89 @@ func UserDel(userToken string, id string) entity.Result {
 
 	tx.Commit()
 	res.State = true
+
+	db.Close()
+	return res
+}
+
+func SignUp(account string, name string, password string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if account == "" {
+		res.Message = lang.IncorrectAccount
+		return res
+	}
+	if len(account) < 6 {
+		res.Message = lang.AccountLengthIsNotEnough
+		return res
+	}
+	if !lib.RegEnNum(account) {
+		res.Message = lang.AccountFormatError
+		return res
+	}
+	if name == "" {
+		res.Message = lang.IncorrectName
+		return res
+	}
+	if !lib.RegAll(name) {
+		res.Message = lang.NicknameFormatError
+		return res
+	}
+	if password == "" {
+		res.Message = lang.IncorrectPassword
+		return res
+	}
+	if len(password) < 6 {
+		res.Message = lang.PasswordLengthIsNotEnough
+		return res
+	}
+	if !lib.RegEnNum(password) {
+		res.Message = lang.PasswordFormatError
+		return res
+	}
+
+	_, _, iss := lib.StringToInt(lib.CheckConf().InitialSpaceSize)
+
+	user := entity.UserEntity{}
+	user.Account = account
+	user.Name = name
+	user.Password = password
+	user.Level = 1
+	user.AvailableSpace = iss
+	user.Createtime = int(lib.TimeStamp())
+
+	_, _, tx, db := model.ConnDB()
+
+	_, _, checkAccount := model.UserDataAccount(tx, account)
+	if checkAccount.ID > 0 {
+		tx.Rollback()
+		res.Message = lang.AccountAlreadyExists
+		return res
+	}
+
+	b, s, r := model.UserAdd(tx, user)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
+		return res
+	}
+
+	lib.WriteLog(account, "user registration account: "+account)
+
+	tx.Commit()
+	res.State = true
+	res.Data = r
 
 	db.Close()
 	return res

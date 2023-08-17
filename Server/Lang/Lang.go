@@ -1,10 +1,6 @@
 package lang
 
-import (
-	entity "duckweed-server/Server/Entity"
-	lib "duckweed-server/Server/Lib"
-	"encoding/json"
-)
+import lib "duckweed-server/Server/Lib"
 
 type language struct {
 	NoData                           string
@@ -27,12 +23,8 @@ type language struct {
 }
 
 func Lang() language {
-	var confEntity entity.ConfEntity
-	_, byteData := lib.FileRead("./Conf.json")
-	json.Unmarshal([]byte(byteData), &confEntity)
-
 	l := language{}
-	if confEntity.Lang == "zh" {
+	if lib.CheckConf().Lang == "zh" {
 		l.NoData = "无数据"
 		l.IncorrectPassword = "密码错误"
 		l.PasswordLengthIsNotEnough = "密码长度不够"
@@ -50,7 +42,7 @@ func Lang() language {
 		l.TheFreeSpaceSizeIsSetIncorrectly = "可用空间设置错误"
 		l.OperationFailed = "操作失败"
 		l.MalformedContent = "内容格式错误"
-	} else if confEntity.Lang == "en" {
+	} else if lib.CheckConf().Lang == "en" {
 		l.NoData = "no data"
 		l.IncorrectPassword = "incorrect password"
 		l.PasswordLengthIsNotEnough = "password length is not enough"

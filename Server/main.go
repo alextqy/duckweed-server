@@ -2,9 +2,7 @@ package main
 
 import (
 	api "duckweed-server/Server/Api"
-	entity "duckweed-server/Server/Entity"
 	lib "duckweed-server/Server/Lib"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,11 +16,6 @@ func main() {
 		fmt.Println(ips[i])
 	}
 
-	// 读取配置文件
-	var confEntity entity.ConfEntity
-	_, byteData := lib.FileRead("./Conf.json")
-	json.Unmarshal([]byte(byteData), &confEntity)
-
 	// 新建数据库文件
 	if !lib.FileExist("../Dao.db") {
 		DaoState, memo := lib.FileMake("../Dao.db")
@@ -31,19 +24,19 @@ func main() {
 		}
 	}
 
-	go loopBroadcast(ips[len(ips)-1], confEntity.UdpPort)
+	go loopBroadcast(ips[len(ips)-1], lib.CheckConf().UdpPort)
 	go systemLog()
 	go space()
 
 	mux := http.NewServeMux()
 	routes(mux)
 	server := &http.Server{
-		Addr:         ":" + confEntity.TcpPort,
+		Addr:         ":" + lib.CheckConf().TcpPort,
 		WriteTimeout: time.Second * 5, //设置写超时
 		ReadTimeout:  time.Second * 5, //设置读超时
 		Handler:      mux,
 	}
-	log.Println("Http server on port:" + confEntity.TcpPort)
+	log.Println("Http server on port:" + lib.CheckConf().TcpPort)
 	log.Fatal(server.ListenAndServe())
 }
 
@@ -84,6 +77,7 @@ func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/user/get", api.UserGet)
 	mux.HandleFunc("/user/action", api.UserAction)
 	mux.HandleFunc("/user/del", api.UserDel)
+	mux.HandleFunc("/sign/up", api.SignUp)
 
 	mux.HandleFunc("/announcements", api.Announcements)
 	mux.HandleFunc("/announcement/get", api.AnnouncementGet)
