@@ -67,3 +67,15 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	password := strings.TrimSpace(Post(r, "password"))
 	HttpWrite(w, processmodule.SignUp(account, name, password))
 }
+
+func CheckPersonalData(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	HttpWrite(w, processmodule.CheckPersonalData(userToken))
+}
+
+func ModifyPersonalData(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	name := strings.TrimSpace(Post(r, "name"))
+	password := strings.TrimSpace(Post(r, "password"))
+	HttpWrite(w, processmodule.ModifyPersonalData(userToken, name, password))
+}

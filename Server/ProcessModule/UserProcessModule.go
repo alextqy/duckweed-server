@@ -128,6 +128,8 @@ func SignOut(userToken string) entity.Result {
 	return res
 }
 
+// 管理员操作 =============================================================================================================================================
+
 func UserList(userToken string, page string, pageSize string, order string, account string, name string, level string, status string) entity.ResultList {
 	lang := lang.Lang()
 	res := entity.ResultList{
@@ -441,6 +443,8 @@ func UserDel(userToken string, id string) entity.Result {
 	return res
 }
 
+// 用户操作 =============================================================================================================================================
+
 func SignUp(account string, name string, password string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
@@ -515,6 +519,85 @@ func SignUp(account string, name string, password string) entity.Result {
 	}
 
 	lib.WriteLog(account, "user registration account: "+account)
+
+	tx.Commit()
+	res.State = true
+	res.Data = r
+
+	db.Close()
+	return res
+}
+
+func CheckPersonalData(userToken string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.NoData
+		return res
+	}
+	res.State = true
+	res.Data = userData
+	return res
+}
+
+func ModifyPersonalData(userToken string, name string, password string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if name == "" {
+		res.Message = lang.IncorrectName
+		return res
+	}
+	if !lib.RegAll(name) {
+		res.Message = lang.NicknameFormatError
+		return res
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.NoData
+		return res
+	}
+
+	userData.Name = name
+	if password != "" && password != userData.Password {
+		if len(password) < 6 {
+			res.Message = lang.PasswordLengthIsNotEnough
+			return res
+		}
+		if !lib.RegEnNum(password) {
+			res.Message = lang.PasswordFormatError
+			return res
+		}
+		userData.Password = lib.MD5(lib.MD5(lib.IntToString(userData.Createtime) + password + lib.IntToString(userData.Createtime)))
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, r := model.UserUpdate(tx, userData)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
+		return res
+	}
+
+	lib.WriteLog(userData.Account, "user modify personal information account: "+userData.Account)
 
 	tx.Commit()
 	res.State = true
