@@ -84,4 +84,9 @@ func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/user/get", api.UserGet)
 	mux.HandleFunc("/user/action", api.UserAction)
 	mux.HandleFunc("/user/del", api.UserDel)
+
+	mux.HandleFunc("/announcements", api.Announcements)
+	mux.HandleFunc("/announcement/get", api.AnnouncementGet)
+	mux.HandleFunc("/announcement/add", api.AnnouncementAdd)
+	mux.HandleFunc("/announcement/del", api.AnnouncementDel)
 }

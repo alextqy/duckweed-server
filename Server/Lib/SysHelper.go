@@ -260,6 +260,16 @@ func RegEnNum(s string) bool {
 	return r.MatchString(s)
 }
 
+// 中英文 数字 下划线 短横线 中英文(逗号 句号 分号 感叹号)
+func RegWriting(s string) bool {
+	r, err := regexp.Compile("^[\u4e00-\u9fa5_a-zA-Z0-9-,.;!，。；！]+$")
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return r.MatchString(s)
+}
+
 // 中英文 数字 下划线 短横线
 func RegAll(s string) bool {
 	r, err := regexp.Compile("^[\u4e00-\u9fa5_a-zA-Z0-9-]+$")

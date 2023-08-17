@@ -23,6 +23,7 @@ type language struct {
 	IncorrectLevel                   string
 	TheFreeSpaceSizeIsSetIncorrectly string
 	OperationFailed                  string
+	MalformedContent                 string
 }
 
 func Lang() language {
@@ -36,7 +37,7 @@ func Lang() language {
 		l.IncorrectPassword = "密码错误"
 		l.PasswordLengthIsNotEnough = "密码长度不够"
 		l.PasswordFormatError = "密码格式错误"
-		l.Typo = "输入有误"
+		l.Typo = "输入错误"
 		l.NoPermission = "无权限"
 		l.AccountDisabled = "账号已禁用"
 		l.IncorrectAccount = "账号错误"
@@ -48,6 +49,7 @@ func Lang() language {
 		l.IncorrectLevel = "等级错误"
 		l.TheFreeSpaceSizeIsSetIncorrectly = "可用空间设置错误"
 		l.OperationFailed = "操作失败"
+		l.MalformedContent = "内容格式错误"
 	} else if confEntity.Lang == "en" {
 		l.NoData = "no data"
 		l.IncorrectPassword = "incorrect password"
@@ -65,6 +67,7 @@ func Lang() language {
 		l.IncorrectLevel = "incorrect level"
 		l.TheFreeSpaceSizeIsSetIncorrectly = "the free space size is set incorrectly"
 		l.OperationFailed = "operation failed"
+		l.MalformedContent = "malformed content"
 	} else {
 		l.NoData = ""
 		l.IncorrectPassword = ""
@@ -82,6 +85,7 @@ func Lang() language {
 		l.IncorrectLevel = ""
 		l.TheFreeSpaceSizeIsSetIncorrectly = ""
 		l.OperationFailed = ""
+		l.MalformedContent = ""
 	}
 	return l
 }
