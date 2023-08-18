@@ -14,9 +14,10 @@ func Dirs(w http.ResponseWriter, r *http.Request) {
 	HttpWrite(w, processmodule.Dirs(userToken, order, parentID, dirName))
 }
 
-func DirAdd(w http.ResponseWriter, r *http.Request) {
+func DirAction(w http.ResponseWriter, r *http.Request) {
 	userToken := strings.TrimSpace(Post(r, "userToken"))
 	dirName := strings.TrimSpace(Post(r, "dirName"))
 	parentID := strings.TrimSpace(Post(r, "parentID"))
-	HttpWrite(w, processmodule.DirAdd(userToken, dirName, parentID))
+	id := strings.TrimSpace(Post(r, "id"))
+	HttpWrite(w, processmodule.DirAction(userToken, dirName, parentID, id))
 }

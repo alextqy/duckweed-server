@@ -44,7 +44,7 @@ func Dirs(userToken string, order string, parentID string, dirName string) entit
 	return res
 }
 
-func DirAdd(userToken string, dirName string, parentID string) entity.Result {
+func DirAction(userToken string, dirName string, parentID string, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -65,6 +65,10 @@ func DirAdd(userToken string, dirName string, parentID string) entity.Result {
 		res.Message = lang.Typo
 		return res
 	}
+	if parentID == id {
+		res.Message = lang.OperationFailed
+		return res
+	}
 	_, _, parentIDInt := lib.StringToInt(parentID)
 	if parentIDInt < 0 {
 		res.Message = lang.Typo
@@ -82,10 +86,12 @@ func DirAdd(userToken string, dirName string, parentID string) entity.Result {
 	if parentIDInt > 0 {
 		b, s, r := model.DirData(tx, parentID)
 		if !b {
+			tx.Rollback()
 			res.Message = s
 			return res
 		}
 		if r.ID == 0 {
+			tx.Rollback()
 			res.Message = lang.ParentFolderDoesNotExist
 			return res
 		}
@@ -93,10 +99,12 @@ func DirAdd(userToken string, dirName string, parentID string) entity.Result {
 
 	b, s, sd := model.DirDataSame(tx, dirName, parentID)
 	if !b {
+		tx.Rollback()
 		res.Message = s
 		return res
 	}
 	if sd.ID > 0 {
+		tx.Rollback()
 		res.Message = lang.DirectoryAlreadyExists
 		return res
 	}
@@ -105,20 +113,43 @@ func DirAdd(userToken string, dirName string, parentID string) entity.Result {
 	dir.DirName = dirName
 	dir.ParentID = parentIDInt
 	dir.UserID = userData.ID
-	b, s, r := model.DirAdd(tx, dir)
-	if !b {
-		res.Message = s
-		return res
-	}
-	if r == 0 {
-		res.Message = lang.OperationFailed
-		return res
-	}
+	_, _, idInt := lib.StringToInt(id)
 
-	lib.WriteLog(userData.Account, "new folder "+dirName)
+	if idInt > 0 {
+		b, s, r := model.DirUpdate(tx, id, dir)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if r == 0 {
+			tx.Rollback()
+			res.Message = lang.OperationFailed
+			return res
+		}
 
-	res.State = true
-	res.Data = r
+		lib.WriteLog(userData.Account, "modify folder id: "+id)
+
+		res.State = true
+		res.Data = r
+	} else {
+		b, s, r := model.DirAdd(tx, dir)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if r == 0 {
+			tx.Rollback()
+			res.Message = lang.OperationFailed
+			return res
+		}
+
+		lib.WriteLog(userData.Account, "new folder "+dirName)
+
+		res.State = true
+		res.Data = r
+	}
 
 	tx.Commit()
 	db.Close()

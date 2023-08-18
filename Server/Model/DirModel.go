@@ -33,7 +33,7 @@ func DirAdd(db *sql.Tx, data entity.DirEntity) (bool, string, int) {
 }
 
 func DirUpdate(db *sql.Tx, id string, data entity.DirEntity) (bool, string, int) {
-	sqlCom := "UPDATE Dir SET DirName=?,ParentID=?,UserID=?,Createtime=? WHERE ID=?"
+	sqlCom := "UPDATE Dir SET DirName=?,ParentID=?,UserID=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
