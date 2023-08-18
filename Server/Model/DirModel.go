@@ -65,6 +65,22 @@ func DirData(db *sql.Tx, id string) (bool, string, entity.DirEntity) {
 	return true, "", data
 }
 
+func DirDataSame(db *sql.Tx, dirName string, parentID string) (bool, string, entity.DirEntity) {
+	data := entity.DirEntity{}
+	sqlCom := "SELECT * FROM Dir WHERE DirName='" + dirName + "' And " + "parentID=" + parentID
+	rows, err := db.Query(sqlCom)
+	if err != nil {
+		return false, err.Error(), data
+	}
+	for rows.Next() {
+		err := rows.Scan(&data.ID, &data.DirName, &data.ParentID, &data.UserID, &data.Createtime)
+		if err != nil {
+			return false, err.Error(), data
+		}
+	}
+	return true, "", data
+}
+
 func Dirs(db *sql.Tx, order int, dirName string, parentID int, userID int) []entity.DirEntity {
 	datas := []entity.DirEntity{}
 	condition_dirName := "1=1"

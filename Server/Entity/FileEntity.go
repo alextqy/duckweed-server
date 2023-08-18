@@ -8,6 +8,6 @@ type FileEntity struct {
 	StoragePath string
 	MD5         string
 	UserID      int
-	DirID       int
+	DirID       int // -1 为回收站
 	Createtime  int
 }

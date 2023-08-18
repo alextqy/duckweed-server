@@ -70,10 +70,10 @@ func SignIn(account string, password string) entity.Result {
 		return res
 	}
 
-	tx.Commit()
 	res.State = true
 	res.Data = userData.UserToken
 
+	tx.Commit()
 	db.Close()
 	return res
 }
@@ -121,9 +121,9 @@ func SignOut(userToken string) entity.Result {
 		return res
 	}
 
-	tx.Commit()
 	res.State = true
 
+	tx.Commit()
 	db.Close()
 	return res
 }
@@ -226,9 +226,9 @@ func UserGet(userToken string, id string) entity.Result {
 		return res
 	}
 
-	tx.Commit()
 	res.Data = r
 
+	tx.Commit()
 	db.Close()
 	return res
 }
@@ -359,10 +359,10 @@ func UserAction(userToken string, account string, name string, password string, 
 		lib.WriteLog(adminAccount, adminAccount+" new user account: "+account)
 	}
 
-	tx.Commit()
 	res.State = true
 	res.Data = r
 
+	tx.Commit()
 	db.Close()
 	return res
 }
@@ -436,9 +436,9 @@ func UserDel(userToken string, id string) entity.Result {
 
 	lib.WriteLog(adminAccount, adminAccount+" delete user data account: "+userData.Account)
 
-	tx.Commit()
 	res.State = true
 
+	tx.Commit()
 	db.Close()
 	return res
 }
@@ -520,10 +520,10 @@ func SignUp(account string, name string, password string) entity.Result {
 
 	lib.WriteLog(account, "user registration account: "+account)
 
-	tx.Commit()
 	res.State = true
 	res.Data = r
 
+	tx.Commit()
 	db.Close()
 	return res
 }
@@ -599,10 +599,10 @@ func ModifyPersonalData(userToken string, name string, password string) entity.R
 
 	lib.WriteLog(userData.Account, "user modify personal information account: "+userData.Account)
 
-	tx.Commit()
 	res.State = true
 	res.Data = r
 
+	tx.Commit()
 	db.Close()
 	return res
 }

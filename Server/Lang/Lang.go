@@ -20,6 +20,9 @@ type language struct {
 	TheFreeSpaceSizeIsSetIncorrectly string
 	OperationFailed                  string
 	MalformedContent                 string
+	DirectoryAlreadyExists           string
+	ParentFolderDoesNotExist         string
+	WrongFormatOfFolderName          string
 }
 
 func Lang() language {
@@ -42,6 +45,9 @@ func Lang() language {
 		l.TheFreeSpaceSizeIsSetIncorrectly = "可用空间设置错误"
 		l.OperationFailed = "操作失败"
 		l.MalformedContent = "内容格式错误"
+		l.DirectoryAlreadyExists = "文件夹已存在"
+		l.ParentFolderDoesNotExist = "上级文件夹不存在"
+		l.WrongFormatOfFolderName = "文件夹名称格式错误"
 	} else if lib.CheckConf().Lang == "en" {
 		l.NoData = "no data"
 		l.IncorrectPassword = "incorrect password"
@@ -60,6 +66,9 @@ func Lang() language {
 		l.TheFreeSpaceSizeIsSetIncorrectly = "the free space size is set incorrectly"
 		l.OperationFailed = "operation failed"
 		l.MalformedContent = "malformed content"
+		l.DirectoryAlreadyExists = "directory already exists"
+		l.ParentFolderDoesNotExist = "parent folder does not exist"
+		l.WrongFormatOfFolderName = "wrong format of folder name"
 	} else {
 		l.NoData = ""
 		l.IncorrectPassword = ""
@@ -78,6 +87,9 @@ func Lang() language {
 		l.TheFreeSpaceSizeIsSetIncorrectly = ""
 		l.OperationFailed = ""
 		l.MalformedContent = ""
+		l.DirectoryAlreadyExists = ""
+		l.ParentFolderDoesNotExist = ""
+		l.WrongFormatOfFolderName = ""
 	}
 	return l
 }
