@@ -61,7 +61,7 @@ func FileAdd(userToken string, fileName string, fileType string, fileSize string
 	}
 
 	userSpace := "../Space/" + userData.Account + "/"
-	fileSpace := userSpace + fileName + "-" + fileType + "-" + lib.Int64ToString(lib.TimeStampMS())
+	fileSpace := userSpace + lib.MD5(lib.Int64ToString(lib.TimeStampMS())+lib.RandStr(5))
 
 	_, _, tx, db := model.ConnDB()
 

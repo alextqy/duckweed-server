@@ -11,6 +11,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"regexp"
@@ -141,6 +142,16 @@ func DeBase64(s64 string) (bool, string, string) {
 
 func StringContains(data string, subs string) bool {
 	return strings.Contains(data, subs)
+}
+
+// 随机字符串
+func RandStr(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }
 
 /*
