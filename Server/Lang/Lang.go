@@ -23,6 +23,8 @@ type language struct {
 	DirectoryAlreadyExists           string
 	ParentFolderDoesNotExist         string
 	WrongFormatOfFolderName          string
+	FileNameFormatError              string
+	FileAlreadyExists                string
 }
 
 func Lang() language {
@@ -48,6 +50,8 @@ func Lang() language {
 		l.DirectoryAlreadyExists = "文件夹已存在"
 		l.ParentFolderDoesNotExist = "上级文件夹不存在"
 		l.WrongFormatOfFolderName = "文件夹名称格式错误"
+		l.FileNameFormatError = "文件名称格式错误"
+		l.FileAlreadyExists = "文件已存在"
 	} else if lib.CheckConf().Lang == "en" {
 		l.NoData = "no data"
 		l.IncorrectPassword = "incorrect password"
@@ -69,6 +73,8 @@ func Lang() language {
 		l.DirectoryAlreadyExists = "directory already exists"
 		l.ParentFolderDoesNotExist = "parent folder does not exist"
 		l.WrongFormatOfFolderName = "wrong format of folder name"
+		l.FileNameFormatError = "file name format error"
+		l.FileAlreadyExists = "file already exists"
 	} else {
 		l.NoData = ""
 		l.IncorrectPassword = ""
@@ -90,6 +96,8 @@ func Lang() language {
 		l.DirectoryAlreadyExists = ""
 		l.ParentFolderDoesNotExist = ""
 		l.WrongFormatOfFolderName = ""
+		l.FileNameFormatError = ""
+		l.FileAlreadyExists = ""
 	}
 	return l
 }

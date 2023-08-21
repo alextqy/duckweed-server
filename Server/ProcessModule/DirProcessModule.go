@@ -155,3 +155,5 @@ func DirAction(userToken string, dirName string, parentID string, id string) ent
 	db.Close()
 	return res
 }
+
+func DirDel() {}

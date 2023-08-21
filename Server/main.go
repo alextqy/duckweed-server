@@ -88,4 +88,6 @@ func routes(mux *http.ServeMux) {
 
 	mux.HandleFunc("/dirs", api.Dirs)
 	mux.HandleFunc("/dir/action", api.DirAction)
+
+	mux.HandleFunc("/file/add", api.FileAdd)
 }
