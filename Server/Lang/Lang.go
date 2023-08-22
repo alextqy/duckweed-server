@@ -21,6 +21,7 @@ type language struct {
 	OperationFailed                  string
 	MalformedContent                 string
 	DirectoryAlreadyExists           string
+	DirectoryDoesNotExist            string
 	ParentFolderDoesNotExist         string
 	WrongFormatOfFolderName          string
 	FileNameFormatError              string
@@ -48,6 +49,7 @@ func Lang() language {
 		l.OperationFailed = "操作失败"
 		l.MalformedContent = "内容格式错误"
 		l.DirectoryAlreadyExists = "文件夹已存在"
+		l.DirectoryDoesNotExist = "文件夹不存在"
 		l.ParentFolderDoesNotExist = "上级文件夹不存在"
 		l.WrongFormatOfFolderName = "文件夹名称格式错误"
 		l.FileNameFormatError = "文件名称格式错误"
@@ -71,6 +73,7 @@ func Lang() language {
 		l.OperationFailed = "operation failed"
 		l.MalformedContent = "malformed content"
 		l.DirectoryAlreadyExists = "directory already exists"
+		l.DirectoryDoesNotExist = "directory does not exist"
 		l.ParentFolderDoesNotExist = "parent folder does not exist"
 		l.WrongFormatOfFolderName = "wrong format of folder name"
 		l.FileNameFormatError = "file name format error"
@@ -94,6 +97,7 @@ func Lang() language {
 		l.OperationFailed = ""
 		l.MalformedContent = ""
 		l.DirectoryAlreadyExists = ""
+		l.DirectoryDoesNotExist = ""
 		l.ParentFolderDoesNotExist = ""
 		l.WrongFormatOfFolderName = ""
 		l.FileNameFormatError = ""

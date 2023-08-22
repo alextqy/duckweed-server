@@ -118,6 +118,92 @@ func FileAdd(userToken string, fileName string, fileType string, fileSize string
 	return res
 }
 
+func FileRename(userToken string, id string, fileName string, dirID string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	if fileName == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	if !lib.RegAll(fileName) {
+		res.Message = lang.FileNameFormatError
+		return res
+	}
+	if dirID == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	_, _, dirIDInt := lib.StringToInt(dirID)
+	if dirIDInt < 0 {
+		res.Message = lang.Typo
+		return res
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.NoData
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, fileData := model.FileData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if fileData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.NoData
+		return res
+	}
+	if dirID != "" && dirIDInt > 0 {
+		b, s, dirData := model.DirData(tx, dirID)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if dirData.ID == 0 {
+			tx.Rollback()
+			res.Message = lang.DirectoryDoesNotExist
+			return res
+		}
+		fileData.DirID = dirIDInt
+	}
+
+	fileData.FileName = fileName
+	b, s, r := model.FileUpdate(tx, id, fileData)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
+		return res
+	}
+
+	res.State = true
+	res.Data = r
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
 // _, f := lib.Filespec("../Temp/Upload/sqlite4.dll")
 // _, _, r := lib.FileReadBlock("../Temp/Upload/sqlite3.dll", 10, 11)
 // b, s := lib.FileWriteByte("../Temp/Upload/sqlite4.dll", r)

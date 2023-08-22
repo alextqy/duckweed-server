@@ -15,3 +15,11 @@ func FileAdd(w http.ResponseWriter, r *http.Request) {
 	dirID := strings.TrimSpace(Post(r, "dirID"))
 	HttpWrite(w, processmodule.FileAdd(userToken, fileName, fileType, fileSize, md5, dirID))
 }
+
+func FileRename(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	id := strings.TrimSpace(Post(r, "id"))
+	fileName := strings.TrimSpace(Post(r, "fileName"))
+	dirID := strings.TrimSpace(Post(r, "dirID"))
+	HttpWrite(w, processmodule.FileRename(userToken, id, fileName, dirID))
+}
