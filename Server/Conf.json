@@ -2,5 +2,6 @@
     "tcp_port": "8080",
     "udp_port": "8181",
     "lang": "zh",
-    "initial_space_size": "1024"
+    "initial_space_size": "1024",
+    "maximum_number_of_tasks": 5
 }

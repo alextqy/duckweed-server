@@ -364,6 +364,71 @@ func UserGet(userToken string, id string) entity.Result {
 // 	return res
 // }
 
+func SetAvailableSpace(userToken string, id string, availableSpace string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	if availableSpace == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	_, _, availableSpaceInt := lib.StringToInt(availableSpace)
+	if availableSpaceInt <= 0 {
+		res.Message = lang.Typo
+		return res
+	}
+
+	permissions, adminAccount := CheckLevel(userToken)
+	if permissions != 2 {
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, userData := model.UserData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if userData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.NoData
+		return res
+	}
+
+	userData.AvailableSpace = availableSpaceInt
+	b, s, r := model.UserUpdate(tx, userData)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
+		return res
+	}
+
+	lib.WriteLog(adminAccount, "set user available space account: "+userData.Account+" "+availableSpace+"M")
+
+	res.State = true
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
 func DisableUser(userToken string, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
