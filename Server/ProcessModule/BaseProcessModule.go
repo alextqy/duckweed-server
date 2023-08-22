@@ -16,6 +16,10 @@ func CheckLevel(userToken string) (int, string) {
 		tx.Rollback()
 		return 0, ""
 	}
+	if userData.ID == 0 {
+		tx.Rollback()
+		return 0, ""
+	}
 	if userData.Status == 2 {
 		tx.Rollback()
 		return 0, ""

@@ -353,9 +353,9 @@ func UserGet(userToken string, id string) entity.Result {
 // 		return res
 // 	}
 // 	if idInt > 0 {
-// 		lib.WriteLog(adminAccount, adminAccount+" update user data account: "+account)
+// 		lib.WriteLog(adminAccount, " update user data account: "+account)
 // 	} else {
-// 		lib.WriteLog(adminAccount, adminAccount+" new user account: "+account)
+// 		lib.WriteLog(adminAccount, " new user account: "+account)
 // 	}
 // 	res.State = true
 // 	res.Data = r
@@ -363,6 +363,77 @@ func UserGet(userToken string, id string) entity.Result {
 // 	db.Close()
 // 	return res
 // }
+
+func DisableUser(userToken string, id string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	permissions, adminAccount := CheckLevel(userToken)
+	if permissions != 2 {
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, userData := model.UserData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if userData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.NoData
+		return res
+	}
+
+	if id == "1" {
+		userData.Status = 1
+	} else {
+		if userData.Status == 1 {
+			userData.Status = 2
+		} else if userData.Status == 2 {
+			userData.Status = 1
+		} else {
+			userData.Status = 1
+		}
+	}
+
+	b, s, r := model.UserUpdate(tx, userData)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
+		return res
+	}
+
+	if userData.Status == 1 {
+		lib.WriteLog(adminAccount, "enable user data account: "+userData.Account)
+	} else {
+		lib.WriteLog(adminAccount, "disable user data account: "+userData.Account)
+	}
+
+	res.State = true
+
+	tx.Commit()
+	db.Close()
+	return res
+}
 
 func UserDel(userToken string, id string) entity.Result {
 	lang := lang.Lang()
@@ -431,7 +502,7 @@ func UserDel(userToken string, id string) entity.Result {
 		return res
 	}
 
-	lib.WriteLog(adminAccount, adminAccount+" delete user data account: "+userData.Account)
+	lib.WriteLog(adminAccount, "delete user data account: "+userData.Account)
 
 	res.State = true
 

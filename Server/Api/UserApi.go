@@ -56,6 +56,12 @@ func UserGet(w http.ResponseWriter, r *http.Request) {
 // 	HttpWrite(w, processmodule.UserAction(userToken, account, name, password, level, availableSpace, email, id))
 // }
 
+func DisableUser(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	id := strings.TrimSpace(Post(r, "id"))
+	HttpWrite(w, processmodule.DisableUser(userToken, id))
+}
+
 func UserDel(w http.ResponseWriter, r *http.Request) {
 	userToken := strings.TrimSpace(Post(r, "userToken"))
 	id := strings.TrimSpace(Post(r, "id"))
