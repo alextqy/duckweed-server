@@ -108,6 +108,7 @@ func FileAdd(userToken string, fileName string, fileType string, fileSize string
 	if fileType != "" {
 		fileType = "." + fileType
 	}
+
 	lib.WriteLog(userData.Account, "create a new file "+fileName+fileType)
 
 	res.State = true
@@ -195,6 +196,8 @@ func FileRename(userToken string, id string, fileName string, dirID string) enti
 		res.Message = lang.OperationFailed
 		return res
 	}
+
+	lib.WriteLog(userData.Account, "modify file id: "+id)
 
 	res.State = true
 	res.Data = r
