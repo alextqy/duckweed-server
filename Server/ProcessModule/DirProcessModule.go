@@ -30,7 +30,7 @@ func Dirs(userToken string, order string, parentID string, dirName string) entit
 
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
-		res.Message = lang.NoData
+		res.Message = lang.ReLoginRequired
 		return res
 	}
 
@@ -77,7 +77,7 @@ func DirAction(userToken string, dirName string, parentID string, id string) ent
 
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
-		res.Message = lang.NoData
+		res.Message = lang.ReLoginRequired
 		return res
 	}
 

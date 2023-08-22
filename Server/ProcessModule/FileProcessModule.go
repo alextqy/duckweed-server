@@ -56,7 +56,7 @@ func FileAdd(userToken string, fileName string, fileType string, fileSize string
 
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
-		res.Message = lang.NoData
+		res.Message = lang.ReLoginRequired
 		return res
 	}
 
@@ -151,7 +151,7 @@ func FileRename(userToken string, id string, fileName string, dirID string) enti
 
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
-		res.Message = lang.NoData
+		res.Message = lang.ReLoginRequired
 		return res
 	}
 

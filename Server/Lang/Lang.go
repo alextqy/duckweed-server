@@ -3,6 +3,7 @@ package lang
 import lib "duckweed-server/Server/Lib"
 
 type language struct {
+	ReLoginRequired                  string
 	NoData                           string
 	IncorrectPassword                string
 	PasswordLengthIsNotEnough        string
@@ -31,6 +32,7 @@ type language struct {
 func Lang() language {
 	l := language{}
 	if lib.CheckConf().Lang == "zh" {
+		l.ReLoginRequired = "需要重新登录"
 		l.NoData = "无数据"
 		l.IncorrectPassword = "密码错误"
 		l.PasswordLengthIsNotEnough = "密码长度不够"
@@ -55,6 +57,7 @@ func Lang() language {
 		l.FileNameFormatError = "文件名称格式错误"
 		l.FileAlreadyExists = "文件已存在"
 	} else if lib.CheckConf().Lang == "en" {
+		l.ReLoginRequired = "re-login required"
 		l.NoData = "no data"
 		l.IncorrectPassword = "incorrect password"
 		l.PasswordLengthIsNotEnough = "password length is not enough"
@@ -79,6 +82,7 @@ func Lang() language {
 		l.FileNameFormatError = "file name format error"
 		l.FileAlreadyExists = "file already exists"
 	} else {
+		l.ReLoginRequired = ""
 		l.NoData = ""
 		l.IncorrectPassword = ""
 		l.PasswordLengthIsNotEnough = ""

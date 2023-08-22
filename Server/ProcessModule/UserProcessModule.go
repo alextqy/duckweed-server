@@ -538,7 +538,7 @@ func CheckPersonalData(userToken string) entity.Result {
 	}
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
-		res.Message = lang.NoData
+		res.Message = lang.ReLoginRequired
 		return res
 	}
 	res.State = true
@@ -566,7 +566,7 @@ func ModifyPersonalData(userToken string, name string, password string) entity.R
 
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
-		res.Message = lang.NoData
+		res.Message = lang.ReLoginRequired
 		return res
 	}
 
