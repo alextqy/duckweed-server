@@ -16,10 +16,24 @@ func FileAdd(w http.ResponseWriter, r *http.Request) {
 	HttpWrite(w, processmodule.FileAdd(userToken, fileName, fileType, fileSize, md5, dirID))
 }
 
-func FileRename(w http.ResponseWriter, r *http.Request) {
+func FileModify(w http.ResponseWriter, r *http.Request) {
 	userToken := strings.TrimSpace(Post(r, "userToken"))
 	id := strings.TrimSpace(Post(r, "id"))
 	fileName := strings.TrimSpace(Post(r, "fileName"))
 	dirID := strings.TrimSpace(Post(r, "dirID"))
-	HttpWrite(w, processmodule.FileRename(userToken, id, fileName, dirID))
+	HttpWrite(w, processmodule.FileModify(userToken, id, fileName, dirID))
+}
+
+func Files(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	order := strings.TrimSpace(Post(r, "order"))
+	fileName := strings.TrimSpace(Post(r, "fileName"))
+	dirID := strings.TrimSpace(Post(r, "dirID"))
+	HttpWrite(w, processmodule.Files(userToken, order, fileName, dirID))
+}
+
+func FileDel(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	id := strings.TrimSpace(Post(r, "id"))
+	HttpWrite(w, processmodule.FileDel(userToken, id))
 }

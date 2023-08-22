@@ -121,7 +121,7 @@ func FileAdd(userToken string, fileName string, fileType string, fileSize string
 	return res
 }
 
-func FileRename(userToken string, id string, fileName string, dirID string) entity.Result {
+func FileModify(userToken string, id string, fileName string, dirID string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -203,6 +203,97 @@ func FileRename(userToken string, id string, fileName string, dirID string) enti
 
 	res.State = true
 	res.Data = r
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
+func Files(userToken string, order string, fileName string, dirID string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	_, _, orderInt := lib.StringToInt(order)
+	_, _, dirIDInt := lib.StringToInt(dirID)
+	if dirIDInt < 0 {
+		res.Message = lang.Typo
+		return res
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	res.State = true
+	res.Data = model.Files(tx, orderInt, fileName, userData.ID, dirIDInt)
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
+func FileDel(userToken string, id string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, fileData := model.FileData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if fileData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.NoData
+		return res
+	}
+
+	if fileData.FileType != "" {
+		fileData.FileType = "." + fileData.FileType
+	}
+
+	b, s, r := model.FileDel(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	lib.WriteLog(userData.Account, " delete file data "+fileData.FileName+fileData.FileType)
+
+	res.State = true
 
 	tx.Commit()
 	db.Close()

@@ -82,6 +82,22 @@ func FileDataSame(db *sql.Tx, dirID string, fileName string, fileType string) (b
 	return true, "", data
 }
 
+func FileDataMD5(db *sql.Tx, md5 string) (bool, string, entity.FileEntity) {
+	data := entity.FileEntity{}
+	sqlCom := "SELECT * FROM File WHERE MD5='" + md5 + "'"
+	rows, err := db.Query(sqlCom)
+	if err != nil {
+		return false, err.Error(), data
+	}
+	for rows.Next() {
+		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID)
+		if err != nil {
+			return false, err.Error(), data
+		}
+	}
+	return true, "", data
+}
+
 func Files(db *sql.Tx, order int, fileName string, userID int, dirID int) []entity.FileEntity {
 	datas := []entity.FileEntity{}
 	condition_fileName := "1=1"
@@ -95,6 +111,8 @@ func Files(db *sql.Tx, order int, fileName string, userID int, dirID int) []enti
 	}
 	if dirID > 0 {
 		condition_dirID = "DirID = " + lib.IntToString(dirID)
+	} else {
+		condition_dirID = "DirID = 0"
 	}
 	orderBy := ""
 	if order == -1 {
@@ -133,6 +151,8 @@ func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, us
 	}
 	if dirID > 0 {
 		condition_dirID = "DirID = " + lib.IntToString(dirID)
+	} else {
+		condition_dirID = "DirID = 0"
 	}
 	if page <= 1 {
 		page = 1

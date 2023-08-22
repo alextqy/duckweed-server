@@ -87,10 +87,12 @@ func Dirs(db *sql.Tx, order int, dirName string, parentID int, userID int) []ent
 	condition_parentID := "1=1"
 	condition_userID := "1=1"
 	if dirName != "" {
-		condition_parentID = "DirName LIKE '%" + dirName + "%'"
+		condition_dirName = "DirName LIKE '%" + dirName + "%'"
 	}
 	if parentID > 0 {
 		condition_parentID = "ParentID = " + lib.IntToString(parentID)
+	} else {
+		condition_parentID = "ParentID = 0"
 	}
 	if userID > 0 {
 		condition_userID = "UserID = " + lib.IntToString(userID)
@@ -125,10 +127,12 @@ func DirList(db *sql.Tx, page int, pageSize int, order int, dirName string, pare
 	condition_parentID := "1=1"
 	condition_userID := "1=1"
 	if dirName != "" {
-		condition_parentID = "DirName LIKE '%" + dirName + "%'"
+		condition_dirName = "DirName LIKE '%" + dirName + "%'"
 	}
 	if parentID > 0 {
 		condition_parentID = "ParentID = " + lib.IntToString(parentID)
+	} else {
+		condition_parentID = "ParentID = 0"
 	}
 	if userID > 0 {
 		condition_userID = "UserID = " + lib.IntToString(userID)

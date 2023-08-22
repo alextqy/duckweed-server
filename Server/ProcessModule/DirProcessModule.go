@@ -16,11 +16,6 @@ func Dirs(userToken string, order string, parentID string, dirName string) entit
 		Data:    nil,
 	}
 
-	if parentID == "" {
-		res.Message = lang.Typo
-		return res
-	}
-
 	_, _, orderInt := lib.StringToInt(order)
 	_, _, parentIDInt := lib.StringToInt(parentID)
 	if parentIDInt < 0 {
