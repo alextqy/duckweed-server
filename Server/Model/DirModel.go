@@ -65,9 +65,9 @@ func DirData(db *sql.Tx, id string) (bool, string, entity.DirEntity) {
 	return true, "", data
 }
 
-func DirDataSame(db *sql.Tx, dirName string, parentID string) (bool, string, entity.DirEntity) {
+func DirDataSame(db *sql.Tx, userID string, parentID string, dirName string) (bool, string, entity.DirEntity) {
 	data := entity.DirEntity{}
-	sqlCom := "SELECT * FROM Dir WHERE DirName='" + dirName + "' And " + "parentID=" + parentID
+	sqlCom := "SELECT * FROM Dir WHERE UserID=" + userID + " AND parentID=" + parentID + " AND DirName='" + dirName + "'"
 	rows, err := db.Query(sqlCom)
 	if err != nil {
 		return false, err.Error(), data

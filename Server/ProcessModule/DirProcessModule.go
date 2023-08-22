@@ -97,15 +97,10 @@ func DirAction(userToken string, dirName string, parentID string, id string) ent
 		}
 	}
 
-	b, s, sd := model.DirDataSame(tx, dirName, parentID)
+	b, s, sd := model.DirDataSame(tx, lib.IntToString(userData.ID), parentID, dirName)
 	if !b {
 		tx.Rollback()
 		res.Message = s
-		return res
-	}
-	if sd.ID > 0 {
-		tx.Rollback()
-		res.Message = lang.DirectoryAlreadyExists
 		return res
 	}
 
@@ -116,6 +111,24 @@ func DirAction(userToken string, dirName string, parentID string, id string) ent
 	_, _, idInt := lib.StringToInt(id)
 
 	if idInt > 0 {
+		b, s, dirData := model.DirData(tx, id)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if dirData.ID == 0 {
+			tx.Rollback()
+			res.Message = lang.DirectoryDoesNotExist
+			return res
+		}
+
+		if sd.ID > 0 && sd.ID != idInt && sd.DirName == dirName {
+			tx.Rollback()
+			res.Message = lang.DirectoryAlreadyExists
+			return res
+		}
+
 		b, s, r := model.DirUpdate(tx, id, dir)
 		if !b {
 			tx.Rollback()
@@ -133,6 +146,12 @@ func DirAction(userToken string, dirName string, parentID string, id string) ent
 		res.State = true
 		res.Data = r
 	} else {
+		if sd.ID > 0 {
+			tx.Rollback()
+			res.Message = lang.DirectoryAlreadyExists
+			return res
+		}
+
 		b, s, r := model.DirAdd(tx, dir)
 		if !b {
 			tx.Rollback()
