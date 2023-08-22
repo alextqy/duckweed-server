@@ -233,139 +233,136 @@ func UserGet(userToken string, id string) entity.Result {
 	return res
 }
 
-func UserAction(userToken string, account string, name string, password string, level string, availableSpace string, id string) entity.Result {
-	lang := lang.Lang()
-	res := entity.Result{
-		State:   false,
-		Code:    200,
-		Message: "",
-		Data:    nil,
-	}
-
-	permissions, adminAccount := CheckLevel(userToken)
-	if permissions != 2 {
-		res.Message = lang.NoPermission
-		return res
-	}
-
-	_, _, levelInt := lib.StringToInt(level)
-	_, _, availableSpaceInt := lib.StringToInt(availableSpace)
-
-	if account == "" {
-		res.Message = lang.IncorrectAccount
-		return res
-	}
-	if len(account) < 6 {
-		res.Message = lang.AccountLengthIsNotEnough
-		return res
-	}
-	if !lib.RegEnNum(account) {
-		res.Message = lang.AccountFormatError
-		return res
-	}
-	if name == "" {
-		res.Message = lang.IncorrectName
-		return res
-	}
-	if !lib.RegAll(name) {
-		res.Message = lang.NicknameFormatError
-		return res
-	}
-	if password == "" {
-		res.Message = lang.IncorrectPassword
-		return res
-	}
-	if len(password) < 6 {
-		res.Message = lang.PasswordLengthIsNotEnough
-		return res
-	}
-	if !lib.RegEnNum(password) {
-		res.Message = lang.PasswordFormatError
-		return res
-	}
-	if level == "" {
-		res.Message = lang.IncorrectLevel
-		return res
-	}
-	if levelInt != 1 && levelInt != 2 {
-		res.Message = lang.IncorrectLevel
-		return res
-	}
-	if availableSpace == "" {
-		res.Message = lang.TheFreeSpaceSizeIsSetIncorrectly
-		return res
-	}
-	if availableSpaceInt < 0 {
-		res.Message = lang.TheFreeSpaceSizeIsSetIncorrectly
-		return res
-	}
-
-	user := entity.UserEntity{}
-	user.Account = account
-	user.Name = name
-	user.Level = levelInt
-	user.AvailableSpace = availableSpaceInt
-	user.Createtime = int(lib.TimeStamp())
-
-	_, _, tx, db := model.ConnDB()
-
-	var b bool
-	var s string
-	var r int
-	_, _, idInt := lib.StringToInt(id)
-	if idInt > 0 {
-		if user.ID == 1 {
-			user.Level = 2
-			user.Status = 1
-		}
-		if user.Password != password {
-			user.Password = lib.MD5(lib.MD5(lib.IntToString(user.Createtime) + password + lib.IntToString(user.Createtime)))
-		}
-
-		user.ID = idInt
-		b, s, r = model.UserUpdate(tx, user)
-		if r == 0 {
-			tx.Rollback()
-			res.Message = lang.OperationFailed
-			return res
-		}
-	} else {
-		// 检查重复账号
-		_, _, checkAccount := model.UserDataAccount(tx, account)
-		if checkAccount.ID > 0 {
-			tx.Rollback()
-			res.Message = lang.AccountAlreadyExists
-			return res
-		}
-
-		user.Password = password
-		b, s, r = model.UserAdd(tx, user)
-		if r == 0 {
-			tx.Rollback()
-			res.Message = lang.OperationFailed
-			return res
-		}
-	}
-
-	if !b {
-		tx.Rollback()
-		res.Message = s
-		return res
-	}
-
-	if idInt > 0 {
-		lib.WriteLog(adminAccount, adminAccount+" update user data account: "+account)
-	} else {
-		lib.WriteLog(adminAccount, adminAccount+" new user account: "+account)
-	}
-
-	res.State = true
-	res.Data = r
-
-	tx.Commit()
-	db.Close()
-	return res
-}
+// func UserAction(userToken string, account string, name string, password string, level string, availableSpace string, email string, id string) entity.Result {
+// 	lang := lang.Lang()
+// 	res := entity.Result{
+// 		State:   false,
+// 		Code:    200,
+// 		Message: "",
+// 		Data:    nil,
+// 	}
+// 	permissions, adminAccount := CheckLevel(userToken)
+// 	if permissions != 2 {
+// 		res.Message = lang.NoPermission
+// 		return res
+// 	}
+// 	_, _, levelInt := lib.StringToInt(level)
+// 	_, _, availableSpaceInt := lib.StringToInt(availableSpace)
+// 	if account == "" {
+// 		res.Message = lang.IncorrectAccount
+// 		return res
+// 	}
+// 	if len(account) < 6 {
+// 		res.Message = lang.AccountLengthIsNotEnough
+// 		return res
+// 	}
+// 	if !lib.RegEnNum(account) {
+// 		res.Message = lang.AccountFormatError
+// 		return res
+// 	}
+// 	if name == "" {
+// 		res.Message = lang.IncorrectName
+// 		return res
+// 	}
+// 	if !lib.RegAll(name) {
+// 		res.Message = lang.NicknameFormatError
+// 		return res
+// 	}
+// 	if password == "" {
+// 		res.Message = lang.IncorrectPassword
+// 		return res
+// 	}
+// 	if len(password) < 6 {
+// 		res.Message = lang.PasswordLengthIsNotEnough
+// 		return res
+// 	}
+// 	if !lib.RegEnNum(password) {
+// 		res.Message = lang.PasswordFormatError
+// 		return res
+// 	}
+// 	if level == "" {
+// 		res.Message = lang.IncorrectLevel
+// 		return res
+// 	}
+// 	if levelInt != 1 && levelInt != 2 {
+// 		res.Message = lang.IncorrectLevel
+// 		return res
+// 	}
+// 	if availableSpace == "" {
+// 		res.Message = lang.TheFreeSpaceSizeIsSetIncorrectly
+// 		return res
+// 	}
+// 	if availableSpaceInt < 0 {
+// 		res.Message = lang.TheFreeSpaceSizeIsSetIncorrectly
+// 		return res
+// 	}
+// 	if email == "" {
+// 		res.Message = lang.EmailError
+// 		return res
+// 	}
+// 	if !lib.RegEmail(email) {
+// 		res.Message = lang.EmailFormatError
+// 		return res
+// 	}
+// 	user := entity.UserEntity{}
+// 	user.Account = account
+// 	user.Name = name
+// 	user.Level = levelInt
+// 	user.AvailableSpace = availableSpaceInt
+// 	user.Createtime = int(lib.TimeStamp())
+// 	user.Email = email
+// 	_, _, tx, db := model.ConnDB()
+// 	var b bool
+// 	var s string
+// 	var r int
+// 	_, _, idInt := lib.StringToInt(id)
+// 	if idInt > 0 {
+// 		if user.ID == 1 {
+// 			user.Level = 2
+// 			user.Status = 1
+// 		}
+// 		if user.Password != password {
+// 			user.Password = lib.MD5(lib.MD5(lib.IntToString(user.Createtime) + password + lib.IntToString(user.Createtime)))
+// 		}
+// 		user.ID = idInt
+// 		b, s, r = model.UserUpdate(tx, user)
+// 		if r == 0 {
+// 			tx.Rollback()
+// 			res.Message = lang.OperationFailed
+// 			return res
+// 		}
+// 	} else {
+// 		// 检查重复账号
+// 		_, _, checkAccount := model.UserDataAccount(tx, account)
+// 		if checkAccount.ID > 0 {
+// 			tx.Rollback()
+// 			res.Message = lang.AccountAlreadyExists
+// 			return res
+// 		}
+// 		user.Password = password
+// 		b, s, r = model.UserAdd(tx, user)
+// 		if r == 0 {
+// 			tx.Rollback()
+// 			res.Message = lang.OperationFailed
+// 			return res
+// 		}
+// 	}
+// 	if !b {
+// 		tx.Rollback()
+// 		res.Message = s
+// 		return res
+// 	}
+// 	if idInt > 0 {
+// 		lib.WriteLog(adminAccount, adminAccount+" update user data account: "+account)
+// 	} else {
+// 		lib.WriteLog(adminAccount, adminAccount+" new user account: "+account)
+// 	}
+// 	res.State = true
+// 	res.Data = r
+// 	tx.Commit()
+// 	db.Close()
+// 	return res
+// }
 
 func UserDel(userToken string, id string) entity.Result {
 	lang := lang.Lang()
@@ -445,7 +442,7 @@ func UserDel(userToken string, id string) entity.Result {
 
 // 用户操作 =============================================================================================================================================
 
-func SignUp(account string, name string, password string) entity.Result {
+func SignUp(account string, name string, password string, email string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -486,6 +483,14 @@ func SignUp(account string, name string, password string) entity.Result {
 		res.Message = lang.PasswordFormatError
 		return res
 	}
+	if email == "" {
+		res.Message = lang.EmailError
+		return res
+	}
+	if !lib.RegEmail(email) {
+		res.Message = lang.EmailFormatError
+		return res
+	}
 
 	_, _, iss := lib.StringToInt(lib.CheckConf().InitialSpaceSize)
 
@@ -496,8 +501,21 @@ func SignUp(account string, name string, password string) entity.Result {
 	user.Level = 1
 	user.AvailableSpace = iss
 	user.Createtime = int(lib.TimeStamp())
+	user.Email = email
 
 	_, _, tx, db := model.ConnDB()
+
+	b, s, checkEmail := model.UserDataEmail(tx, email)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if checkEmail.ID > 0 {
+		tx.Rollback()
+		res.Message = lang.EmailAlreadyInUse
+		return res
+	}
 
 	_, _, checkAccount := model.UserDataAccount(tx, account)
 	if checkAccount.ID > 0 {
@@ -546,7 +564,7 @@ func CheckPersonalData(userToken string) entity.Result {
 	return res
 }
 
-func ModifyPersonalData(userToken string, name string, password string) entity.Result {
+func ModifyPersonalData(userToken string, name string, password string, email string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -563,6 +581,14 @@ func ModifyPersonalData(userToken string, name string, password string) entity.R
 		res.Message = lang.NicknameFormatError
 		return res
 	}
+	if email == "" {
+		res.Message = lang.EmailError
+		return res
+	}
+	if !lib.RegEmail(email) {
+		res.Message = lang.EmailFormatError
+		return res
+	}
 
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
@@ -571,6 +597,7 @@ func ModifyPersonalData(userToken string, name string, password string) entity.R
 	}
 
 	userData.Name = name
+	userData.Email = email
 	if password != "" && password != userData.Password {
 		if len(password) < 6 {
 			res.Message = lang.PasswordLengthIsNotEnough
@@ -584,6 +611,20 @@ func ModifyPersonalData(userToken string, name string, password string) entity.R
 	}
 
 	_, _, tx, db := model.ConnDB()
+
+	if userData.Email != email {
+		b, s, checkEmail := model.UserDataEmail(tx, email)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if checkEmail.ID > 0 {
+			tx.Rollback()
+			res.Message = lang.EmailAlreadyInUse
+			return res
+		}
+	}
 
 	b, s, r := model.UserUpdate(tx, userData)
 	if !b {

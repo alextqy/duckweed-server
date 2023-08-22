@@ -44,16 +44,17 @@ func UserGet(w http.ResponseWriter, r *http.Request) {
 	HttpWrite(w, processmodule.UserGet(userToken, id))
 }
 
-func UserAction(w http.ResponseWriter, r *http.Request) {
-	userToken := strings.TrimSpace(Post(r, "userToken"))
-	account := strings.TrimSpace(Post(r, "account"))
-	name := strings.TrimSpace(Post(r, "name"))
-	password := strings.TrimSpace(Post(r, "password"))
-	level := strings.TrimSpace(Post(r, "level"))
-	availableSpace := strings.TrimSpace(Post(r, "availableSpace"))
-	id := strings.TrimSpace(Post(r, "id"))
-	HttpWrite(w, processmodule.UserAction(userToken, account, name, password, level, availableSpace, id))
-}
+// func UserAction(w http.ResponseWriter, r *http.Request) {
+// 	userToken := strings.TrimSpace(Post(r, "userToken"))
+// 	account := strings.TrimSpace(Post(r, "account"))
+// 	name := strings.TrimSpace(Post(r, "name"))
+// 	password := strings.TrimSpace(Post(r, "password"))
+// 	level := strings.TrimSpace(Post(r, "level"))
+// 	availableSpace := strings.TrimSpace(Post(r, "availableSpace"))
+// 	email := strings.TrimSpace(Post(r, "email"))
+// 	id := strings.TrimSpace(Post(r, "id"))
+// 	HttpWrite(w, processmodule.UserAction(userToken, account, name, password, level, availableSpace, email, id))
+// }
 
 func UserDel(w http.ResponseWriter, r *http.Request) {
 	userToken := strings.TrimSpace(Post(r, "userToken"))
@@ -65,7 +66,8 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	account := strings.TrimSpace(Post(r, "account"))
 	name := strings.TrimSpace(Post(r, "name"))
 	password := strings.TrimSpace(Post(r, "password"))
-	HttpWrite(w, processmodule.SignUp(account, name, password))
+	email := strings.TrimSpace(Post(r, "email"))
+	HttpWrite(w, processmodule.SignUp(account, name, password, email))
 }
 
 func CheckPersonalData(w http.ResponseWriter, r *http.Request) {
@@ -77,5 +79,6 @@ func ModifyPersonalData(w http.ResponseWriter, r *http.Request) {
 	userToken := strings.TrimSpace(Post(r, "userToken"))
 	name := strings.TrimSpace(Post(r, "name"))
 	password := strings.TrimSpace(Post(r, "password"))
-	HttpWrite(w, processmodule.ModifyPersonalData(userToken, name, password))
+	email := strings.TrimSpace(Post(r, "email"))
+	HttpWrite(w, processmodule.ModifyPersonalData(userToken, name, password, email))
 }

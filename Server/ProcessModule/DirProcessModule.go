@@ -117,6 +117,11 @@ func DirAction(userToken string, dirName string, parentID string, id string) ent
 			res.Message = lang.DirectoryDoesNotExist
 			return res
 		}
+		if dirData.UserID != userData.ID {
+			tx.Rollback()
+			res.Message = lang.NoPermission
+			return res
+		}
 
 		if sd.ID > 0 && sd.ID != idInt && sd.DirName == dirName {
 			tx.Rollback()
@@ -169,5 +174,3 @@ func DirAction(userToken string, dirName string, parentID string, id string) ent
 	db.Close()
 	return res
 }
-
-func DirDel() {}

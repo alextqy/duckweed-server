@@ -171,6 +171,11 @@ func FileModify(userToken string, id string, fileName string, dirID string) enti
 		res.Message = lang.NoData
 		return res
 	}
+	if fileData.UserID != userData.ID {
+		tx.Rollback()
+		res.Message = lang.NoPermission
+		return res
+	}
 	if dirID != "" && dirIDInt > 0 {
 		b, s, dirData := model.DirData(tx, dirID)
 		if !b {
@@ -272,6 +277,11 @@ func FileDel(userToken string, id string) entity.Result {
 	if fileData.ID == 0 {
 		tx.Rollback()
 		res.Message = lang.NoData
+		return res
+	}
+	if fileData.UserID != userData.ID {
+		tx.Rollback()
+		res.Message = lang.NoPermission
 		return res
 	}
 

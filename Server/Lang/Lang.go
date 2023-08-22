@@ -27,6 +27,9 @@ type language struct {
 	WrongFormatOfFolderName          string
 	FileNameFormatError              string
 	FileAlreadyExists                string
+	EmailError                       string
+	EmailFormatError                 string
+	EmailAlreadyInUse                string
 }
 
 func Lang() language {
@@ -56,6 +59,9 @@ func Lang() language {
 		l.WrongFormatOfFolderName = "文件夹名称格式错误"
 		l.FileNameFormatError = "文件名称格式错误"
 		l.FileAlreadyExists = "文件已存在"
+		l.EmailError = "电子邮件错误"
+		l.EmailFormatError = "电子邮件格式错误"
+		l.EmailAlreadyInUse = "电子邮件已被使用"
 	} else if lib.CheckConf().Lang == "en" {
 		l.ReLoginRequired = "re-login required"
 		l.NoData = "no data"
@@ -81,6 +87,9 @@ func Lang() language {
 		l.WrongFormatOfFolderName = "wrong format of folder name"
 		l.FileNameFormatError = "file name format error"
 		l.FileAlreadyExists = "file already exists"
+		l.EmailError = "email error"
+		l.EmailFormatError = "email format error"
+		l.EmailAlreadyInUse = "email already in use"
 	} else {
 		l.ReLoginRequired = ""
 		l.NoData = ""
@@ -106,6 +115,9 @@ func Lang() language {
 		l.WrongFormatOfFolderName = ""
 		l.FileNameFormatError = ""
 		l.FileAlreadyExists = ""
+		l.EmailError = ""
+		l.EmailFormatError = ""
+		l.EmailAlreadyInUse = ""
 	}
 	return l
 }

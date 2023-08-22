@@ -11,4 +11,6 @@ type UserEntity struct {
 	UsedSpace      int // 已使用空间M
 	Createtime     int
 	UserToken      string
+	Email          string
+	Captcha        string
 }

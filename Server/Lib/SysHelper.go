@@ -263,6 +263,15 @@ func RegAll(s string) bool {
 	return r.MatchString(s)
 }
 
+func RegEmail(s string) bool {
+	r, err := regexp.Compile(`\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`)
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+	return r.MatchString(s)
+}
+
 func LogDir() string {
 	return "../Log/" + strings.Split(TimeNowStr(), " ")[0] + "/"
 }

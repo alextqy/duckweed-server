@@ -15,15 +15,14 @@ func UserCount(db *sql.Tx) int {
 }
 
 func UserAdd(db *sql.Tx, data entity.UserEntity) (bool, string, int) {
-	sqlCom := "INSERT INTO User(Account,Name,Password,Level,Status,AvailableSpace,Createtime) VALUES(?,?,?,?,?,?,?)"
+	sqlCom := "INSERT INTO User(Account,Name,Password,Level,Status,AvailableSpace,Createtime,Email) VALUES(?,?,?,?,?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
 	data.Password = lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Password + lib.IntToString(data.Createtime)))
 	data.Status = 1
-	data.UsedSpace = 0
-	row, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, data.Createtime)
+	row, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, data.Createtime, data.Email)
 	if err != nil {
 		return false, err.Error(), 0
 	}
@@ -35,12 +34,12 @@ func UserAdd(db *sql.Tx, data entity.UserEntity) (bool, string, int) {
 }
 
 func UserUpdate(db *sql.Tx, data entity.UserEntity) (bool, string, int) {
-	sqlCom := "UPDATE User SET Account=?,Name=?,Password=?,Level=?,Status=?,AvailableSpace=?,UsedSpace=?,UserToken=? WHERE ID=?"
+	sqlCom := "UPDATE User SET Account=?,Name=?,Password=?,Level=?,Status=?,AvailableSpace=?,UsedSpace=?,UserToken=?,Email=?,Captcha=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	res, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, data.UsedSpace, data.UserToken, data.ID)
+	res, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, data.UsedSpace, data.UserToken, data.Email, data.Captcha, data.ID)
 	if err != nil {
 		return false, err.Error(), 0
 	}
@@ -59,7 +58,7 @@ func UserData(db *sql.Tx, id string) (bool, string, entity.UserEntity) {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken, &data.Email, &data.Captcha)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -75,7 +74,23 @@ func UserDataAccount(db *sql.Tx, account string) (bool, string, entity.UserEntit
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken, &data.Email, &data.Captcha)
+		if err != nil {
+			return false, err.Error(), data
+		}
+	}
+	return true, "", data
+}
+
+func UserDataEmail(db *sql.Tx, email string) (bool, string, entity.UserEntity) {
+	data := entity.UserEntity{}
+	sqlCom := "SELECT * FROM User WHERE Email='" + email + "'"
+	rows, err := db.Query(sqlCom)
+	if err != nil {
+		return false, err.Error(), data
+	}
+	for rows.Next() {
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken, &data.Email, &data.Captcha)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -91,7 +106,7 @@ func UserDataToken(db *sql.Tx, userToken string) (bool, string, entity.UserEntit
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken, &data.Email, &data.Captcha)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -132,7 +147,7 @@ func Users(db *sql.Tx, order int, account string, name string, level int, status
 	}
 	for rows.Next() {
 		data := entity.UserEntity{}
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken, &data.Email, &data.Captcha)
 		if err != nil {
 			fmt.Println(err.Error())
 			return nil
@@ -190,7 +205,7 @@ func UserList(db *sql.Tx, page int, pageSize int, order int, account string, nam
 	}
 	for rows.Next() {
 		data := entity.UserEntity{}
-		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken)
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken, &data.Email, &data.Captcha)
 		if err != nil {
 			fmt.Println(err.Error())
 			return 0, 0, 0, nil

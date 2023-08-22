@@ -21,3 +21,9 @@ func DirAction(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimSpace(Post(r, "id"))
 	HttpWrite(w, processmodule.DirAction(userToken, dirName, parentID, id))
 }
+
+func DirDel(w http.ResponseWriter, r *http.Request) {
+	// userToken := strings.TrimSpace(Post(r, "userToken"))
+	// id := strings.TrimSpace(Post(r, "id"))
+	// HttpWrite(w, processmodule.DirDel(userToken, id))
+}
