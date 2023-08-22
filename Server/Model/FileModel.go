@@ -15,14 +15,14 @@ func FileCount(db *sql.Tx) int {
 }
 
 func FileAdd(db *sql.Tx, data entity.FileEntity) (bool, string, int) {
-	sqlCom := "INSERT INTO File(FileName,FileType,FileSize,StoragePath,MD5,UserID,DirID,Createtime,Status) VALUES(?,?,?,?,?,?,?,?,?)"
+	sqlCom := "INSERT INTO File(FileName,FileType,FileSize,StoragePath,MD5,UserID,DirID,Createtime,Status,OutreachID) VALUES(?,?,?,?,?,?,?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
 	data.Createtime = int(lib.TimeStamp())
 	data.Status = 1
-	row, err := stmt.Exec(data.FileName, data.FileType, data.FileSize, data.StoragePath, data.MD5, data.UserID, data.DirID, data.Createtime, data.Status)
+	row, err := stmt.Exec(data.FileName, data.FileType, data.FileSize, data.StoragePath, data.MD5, data.UserID, data.DirID, data.Createtime, data.Status, data.OutreachID)
 	if err != nil {
 		return false, err.Error(), 0
 	}
@@ -58,7 +58,7 @@ func FileData(db *sql.Tx, id string) (bool, string, entity.FileEntity) {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status)
+		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -74,7 +74,7 @@ func FileDataSame(db *sql.Tx, dirID string, fileName string, fileType string) (b
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status)
+		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -110,7 +110,7 @@ func Files(db *sql.Tx, order int, fileName string, userID int, dirID int) []enti
 	}
 	for rows.Next() {
 		data := entity.FileEntity{}
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status)
+		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID)
 		if err != nil {
 			fmt.Println(err.Error())
 			return nil
@@ -159,7 +159,7 @@ func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, us
 	}
 	for rows.Next() {
 		data := entity.FileEntity{}
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status)
+		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID)
 		if err != nil {
 			fmt.Println(err.Error())
 			return 0, 0, 0, nil

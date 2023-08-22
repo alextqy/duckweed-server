@@ -10,5 +10,6 @@ type FileEntity struct {
 	UserID      int
 	DirID       int // -1 为回收站
 	Createtime  int
-	Status      int // 1 上传中 2 完成 3 操作失败
+	Status      int    // 1 上传中 2 完成 3 操作失败
+	OutreachID  string // 唯一编码
 }

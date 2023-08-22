@@ -61,7 +61,8 @@ func FileAdd(userToken string, fileName string, fileType string, fileSize string
 	}
 
 	userSpace := "../Space/" + userData.Account + "/"
-	fileSpace := userSpace + lib.MD5(lib.Int64ToString(lib.TimeStampMS())+userData.Account+lib.RandStr(5))
+	outreachID := lib.MD5(lib.Int64ToString(lib.TimeStampMS()) + userData.Account + lib.RandStr(5))
+	fileSpace := userSpace + outreachID
 
 	_, _, tx, db := model.ConnDB()
 
@@ -85,6 +86,7 @@ func FileAdd(userToken string, fileName string, fileType string, fileSize string
 	file.MD5 = md5
 	file.UserID = userData.ID
 	file.DirID = dirIDInt
+	file.OutreachID = outreachID
 
 	b, s, r := model.FileAdd(tx, file)
 	if !b {
