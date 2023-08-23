@@ -572,6 +572,20 @@ func UserDel(userToken, id string) entity.Result {
 		return res
 	}
 
+	// 删除用户日志文件
+	b, s, d, _ := lib.DirTraverse("../Log")
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if len(d) > 0 {
+		for i := 0; i < len(d); i++ {
+			f := d[i] + "/" + userData.Account + ".log"
+			lib.FileRemove(f)
+		}
+	}
+
 	lib.WriteLog(adminAccount, "delete user data account: "+userData.Account)
 
 	res.State = true

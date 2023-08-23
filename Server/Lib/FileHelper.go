@@ -177,3 +177,24 @@ func DirDel(dirPath string) (bool, string) {
 	}
 	return true, ""
 }
+
+// 遍历文件夹
+func DirTraverse(dirPath string) (bool, string, []string, []string) {
+	dir, err := os.ReadDir(dirPath)
+	if err != nil {
+		return false, err.Error(), nil, nil
+	}
+
+	var dirs []string
+	var files []string
+	PathSep := string(os.PathSeparator)
+	for _, obj := range dir {
+		if obj.IsDir() {
+			dirs = append(dirs, dirPath+PathSep+obj.Name())
+		} else {
+			files = append(files, dirPath+PathSep+obj.Name())
+		}
+	}
+
+	return true, "", dirs, files
+}
