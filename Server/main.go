@@ -75,7 +75,6 @@ func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/user/list", api.UserList)
 	mux.HandleFunc("/users", api.Users)
 	mux.HandleFunc("/user/get", api.UserGet)
-	// mux.HandleFunc("/user/action", api.UserAction)
 	mux.HandleFunc("/set/available/space", api.SetAvailableSpace)
 	mux.HandleFunc("/disable/user", api.DisableUser)
 	mux.HandleFunc("/user/del", api.UserDel)
@@ -94,12 +93,12 @@ func routes(mux *http.ServeMux) {
 
 	mux.HandleFunc("/dirs", api.Dirs)
 	mux.HandleFunc("/dir/action", api.DirAction)
-	mux.HandleFunc("/dir/del", api.DirDel)
+	mux.HandleFunc("/dir/del", api.DirDel) // x
 
 	mux.HandleFunc("/file/add", api.FileAdd)
 	mux.HandleFunc("/file/modify", api.FileModify)
 	mux.HandleFunc("/files", api.Files)
 	mux.HandleFunc("/file/del", api.FileDel)
-	mux.HandleFunc("/file/upload", api.FileUpload)
-	mux.HandleFunc("/file/download", api.FileDownload)
+	mux.HandleFunc("/file/upload", api.FileUpload)     // x
+	mux.HandleFunc("/file/download", api.FileDownload) // x
 }
