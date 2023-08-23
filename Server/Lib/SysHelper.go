@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"net/smtp"
 	"os"
 	"regexp"
 	"strconv"
@@ -270,6 +271,49 @@ func RegEmail(s string) bool {
 		return false
 	}
 	return r.MatchString(s)
+}
+
+/*
+发送邮件(腾讯邮箱三方设备授权码: qfjhhammjflgbjcc)
+account 邮箱(tqyalex@qq.com)
+password 密码
+sender 发送者名称(Duckweed Server)
+host 邮箱服务器(smtp.qq.com:465)
+to 客户邮箱
+subject 标题(Reset Password)
+body 内容(验证码)
+*/
+func SendEmail(account, password, sender, host, to, subject, body string) (bool, string) {
+	if account == "" {
+		return false, "incorrect account"
+	}
+	if password == "" {
+		return false, "incorrect password"
+	}
+	if sender == "" {
+		return false, "incorrect sender"
+	}
+	if host == "" {
+		return false, "incorrect host"
+	}
+	if to == "" {
+		return false, "incorrect email address"
+	}
+	if subject == "" {
+		return false, "incorrect title"
+	}
+	if body == "" {
+		return false, "incorrect content"
+	}
+	hp := strings.Split(host, ":")
+	auth := smtp.PlainAuth("", account, password, hp[0])
+	msg := []byte("To: " + to + "\r\nFrom:" + sender + "<" + account + ">" + "\r\nSubject:" + subject + "\r\nContent-Type:text/plain;charset=UTF-8\r\n\r\n" + body)
+	sendTo := strings.Split(to, ";")
+	err := smtp.SendMail(host, auth, account, sendTo, msg)
+	if err != nil {
+		return false, err.Error()
+	}
+	return true, ""
 }
 
 func LogDir() string {

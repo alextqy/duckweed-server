@@ -98,6 +98,22 @@ func UserDataEmail(db *sql.Tx, email string) (bool, string, entity.UserEntity) {
 	return true, "", data
 }
 
+func UserDataCaptcha(db *sql.Tx, captcha string) (bool, string, entity.UserEntity) {
+	data := entity.UserEntity{}
+	sqlCom := "SELECT * FROM User WHERE Captcha='" + captcha + "'"
+	rows, err := db.Query(sqlCom)
+	if err != nil {
+		return false, err.Error(), data
+	}
+	for rows.Next() {
+		err := rows.Scan(&data.ID, &data.Account, &data.Name, &data.Password, &data.Level, &data.Status, &data.AvailableSpace, &data.UsedSpace, &data.Createtime, &data.UserToken, &data.Email, &data.Captcha)
+		if err != nil {
+			return false, err.Error(), data
+		}
+	}
+	return true, "", data
+}
+
 func UserDataToken(db *sql.Tx, userToken string) (bool, string, entity.UserEntity) {
 	data := entity.UserEntity{}
 	sqlCom := "SELECT * FROM User WHERE UserToken='" + userToken + "'"

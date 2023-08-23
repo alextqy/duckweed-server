@@ -7,7 +7,7 @@ import (
 	model "duckweed-server/Server/Model"
 )
 
-func SignIn(account string, password string) entity.Result {
+func SignIn(account, password string) entity.Result {
 	lang := lang.Lang()
 	_, _, tx, db := model.ConnDB()
 	res := entity.Result{
@@ -63,6 +63,7 @@ func SignIn(account string, password string) entity.Result {
 	// 写入Token
 	token := lib.MD5(lib.MD5(lib.TimeNowStr() + userData.Password + lib.TimeNowStr()))
 	userData.UserToken = token
+	userData.Captcha = ""
 	b, s, _ = model.UserUpdate(tx, userData)
 	if !b {
 		tx.Rollback()
@@ -130,7 +131,7 @@ func SignOut(userToken string) entity.Result {
 
 // 管理员操作 =============================================================================================================================================
 
-func UserList(userToken string, page string, pageSize string, order string, account string, name string, level string, status string) entity.ResultList {
+func UserList(userToken, page, pageSize, order, account, name, level, status string) entity.ResultList {
 	lang := lang.Lang()
 	res := entity.ResultList{
 		State:     false,
@@ -167,7 +168,7 @@ func UserList(userToken string, page string, pageSize string, order string, acco
 	return res
 }
 
-func Users(userToken string, order string, account string, name string, level string, status string) entity.Result {
+func Users(userToken, order, account, name, level, status string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -198,7 +199,7 @@ func Users(userToken string, order string, account string, name string, level st
 	return res
 }
 
-func UserGet(userToken string, id string) entity.Result {
+func UserGet(userToken, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -364,7 +365,7 @@ func UserGet(userToken string, id string) entity.Result {
 // 	return res
 // }
 
-func SetAvailableSpace(userToken string, id string, availableSpace string) entity.Result {
+func SetAvailableSpace(userToken, id, availableSpace string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -429,7 +430,7 @@ func SetAvailableSpace(userToken string, id string, availableSpace string) entit
 	return res
 }
 
-func DisableUser(userToken string, id string) entity.Result {
+func DisableUser(userToken, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -500,7 +501,7 @@ func DisableUser(userToken string, id string) entity.Result {
 	return res
 }
 
-func UserDel(userToken string, id string) entity.Result {
+func UserDel(userToken, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -578,7 +579,7 @@ func UserDel(userToken string, id string) entity.Result {
 
 // 用户操作 =============================================================================================================================================
 
-func SignUp(account string, name string, password string, email string) entity.Result {
+func SignUp(account, name, password, email string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -700,7 +701,7 @@ func CheckPersonalData(userToken string) entity.Result {
 	return res
 }
 
-func ModifyPersonalData(userToken string, name string, password string, email string) entity.Result {
+func ModifyPersonalData(userToken, name, password, email string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -778,6 +779,132 @@ func ModifyPersonalData(userToken string, name string, password string, email st
 
 	res.State = true
 	res.Data = r
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
+func SendEmail(email string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if email == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	if !lib.RegEmail(email) {
+		res.Message = lang.EmailFormatError
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, userData := model.UserDataEmail(tx, email)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if userData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.EmailAddressDoesNotExist
+		return res
+	}
+	if userData.Email == "" {
+		tx.Rollback()
+		res.Message = lang.EmailAddressDoesNotExist
+		return res
+	}
+
+	captcha := lib.RandStr(5) // 验证码
+
+	userData.Captcha = captcha
+	b, s, r := model.UserUpdate(tx, userData)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	b, s = lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", userData.Email, "Reset Password", captcha) // 发送邮件
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	res.State = true
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
+func ResetPassword(newPassword string, captcha string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if newPassword == "" {
+		res.Message = lang.IncorrectPassword
+		return res
+	}
+	if len(newPassword) < 6 {
+		res.Message = lang.PasswordLengthIsNotEnough
+		return res
+	}
+	if !lib.RegEnNum(newPassword) {
+		res.Message = lang.PasswordFormatError
+		return res
+	}
+	if captcha == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, userData := model.UserDataCaptcha(tx, captcha)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if userData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.IncorrectCaptcha
+		return res
+	}
+
+	userData.Password = lib.MD5(lib.MD5(lib.IntToString(userData.Createtime) + newPassword + lib.IntToString(userData.Createtime)))
+	b, s, r := model.UserUpdate(tx, userData)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
+		return res
+	}
+
+	res.State = true
 
 	tx.Commit()
 	db.Close()
