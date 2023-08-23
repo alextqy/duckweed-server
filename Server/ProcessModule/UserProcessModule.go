@@ -520,6 +520,10 @@ func UserDel(userToken, id string) entity.Result {
 		res.Message = lang.Typo
 		return res
 	}
+	if id == "1" {
+		res.Message = lang.OperationFailed
+		return res
+	}
 
 	_, _, tx, db := model.ConnDB()
 
@@ -812,11 +816,6 @@ func SendEmail(email string) entity.Result {
 		return res
 	}
 	if userData.ID == 0 {
-		tx.Rollback()
-		res.Message = lang.EmailAddressDoesNotExist
-		return res
-	}
-	if userData.Email == "" {
 		tx.Rollback()
 		res.Message = lang.EmailAddressDoesNotExist
 		return res
