@@ -20,7 +20,7 @@ func UserAdd(db *sql.Tx, data entity.UserEntity) (bool, string, int) {
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	data.Password = lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Password + lib.IntToString(data.Createtime)))
+	data.Password = lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Account + data.Password + lib.IntToString(data.Createtime)))
 	data.Status = 1
 	row, err := stmt.Exec(data.Account, data.Name, data.Password, data.Level, data.Status, data.AvailableSpace, data.Createtime, data.Email)
 	if err != nil {

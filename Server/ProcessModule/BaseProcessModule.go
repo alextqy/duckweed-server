@@ -2,6 +2,7 @@ package processmodule
 
 import (
 	entity "duckweed-server/Server/Entity"
+	lib "duckweed-server/Server/Lib"
 	model "duckweed-server/Server/Model"
 )
 
@@ -50,4 +51,12 @@ func CheckToken(userToken string) entity.UserEntity {
 	tx.Commit()
 	db.Close()
 	return userData
+}
+
+func UserPWD(data entity.UserEntity, password string) string {
+	return lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Account + password + lib.IntToString(data.Createtime)))
+}
+
+func UserToken(data entity.UserEntity) string {
+	return lib.MD5(lib.MD5(lib.TimeNowStr() + data.Password + lib.RandStr(4) + lib.TimeNowStr()))
 }

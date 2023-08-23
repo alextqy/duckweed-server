@@ -35,7 +35,7 @@ func SignIn(account, password string) entity.Result {
 		return res
 	}
 
-	if lib.MD5(lib.MD5(lib.IntToString(userData.Createtime)+password+lib.IntToString(userData.Createtime))) != userData.Password {
+	if UserPWD(userData, password) != userData.Password {
 		tx.Rollback()
 		res.Message = lang.IncorrectPassword
 		return res
@@ -61,7 +61,7 @@ func SignIn(account, password string) entity.Result {
 	}
 
 	// 写入Token
-	token := lib.MD5(lib.MD5(lib.TimeNowStr() + userData.Password + lib.TimeNowStr()))
+	token := UserToken(userData)
 	userData.UserToken = token
 	userData.Captcha = ""
 	b, s, _ = model.UserUpdate(tx, userData)
@@ -748,7 +748,7 @@ func ModifyPersonalData(userToken, name, password, email string) entity.Result {
 			res.Message = lang.PasswordFormatError
 			return res
 		}
-		userData.Password = lib.MD5(lib.MD5(lib.IntToString(userData.Createtime) + password + lib.IntToString(userData.Createtime)))
+		userData.Password = UserPWD(userData, password)
 	}
 
 	_, _, tx, db := model.ConnDB()
@@ -890,7 +890,8 @@ func ResetPassword(newPassword string, captcha string) entity.Result {
 		return res
 	}
 
-	userData.Password = lib.MD5(lib.MD5(lib.IntToString(userData.Createtime) + newPassword + lib.IntToString(userData.Createtime)))
+	userData.Password = UserPWD(userData, newPassword)
+	userData.Captcha = ""
 	b, s, r := model.UserUpdate(tx, userData)
 	if !b {
 		tx.Rollback()
