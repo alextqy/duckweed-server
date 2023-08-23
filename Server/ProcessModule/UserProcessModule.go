@@ -596,7 +596,7 @@ func SignUp(account, name, password, email string) entity.Result {
 		res.Message = lang.IncorrectAccount
 		return res
 	}
-	if len(account) < 6 {
+	if len(account) < 4 {
 		res.Message = lang.AccountLengthIsNotEnough
 		return res
 	}
