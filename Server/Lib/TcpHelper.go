@@ -11,7 +11,7 @@ import (
 )
 
 // tcp socket 服务器端
-func TcpServer(ip string, port string, content string) {
+func TcpServer(ip, port, content string) {
 	addr, err := net.ResolveTCPAddr("tcp", ip+":"+port)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -48,7 +48,7 @@ func clientMessage(conn net.Conn) {
 	}
 }
 
-func TcpServerPlus(ip string, port string) {
+func TcpServerPlus(ip, port string) {
 	addr, err := net.ResolveTCPAddr("tcp", ip+":"+port)
 	if err != nil {
 		log.Fatal(err.Error())

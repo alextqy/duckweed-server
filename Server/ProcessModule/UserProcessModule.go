@@ -850,7 +850,7 @@ func SendEmail(email string) entity.Result {
 	return res
 }
 
-func ResetPassword(newPassword string, captcha string) entity.Result {
+func ResetPassword(newPassword, captcha string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,

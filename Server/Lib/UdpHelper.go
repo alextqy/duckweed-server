@@ -30,7 +30,7 @@ func UdpServer(port string, content string, bufSize int) {
 }
 
 // socket客户端
-func UdpClient(ip string, port string) {
+func UdpClient(ip, port string) {
 	udpAddr, err1 := net.ResolveUDPAddr("udp4", ip+":"+port) // 转换地址，作为客户端使用要向远程发送消息，这里用远程地址与端口号
 	if err1 != nil {
 		fmt.Println(err1.Error())
@@ -98,7 +98,7 @@ func BroadcastAddress() ([]string, string) {
 }
 
 // udp广播
-func Broadcast(port string, content string) {
+func Broadcast(port, content string) {
 	conn, err := net.Dial("udp", "255.255.255.255:"+port)
 
 	defer func(conn io.Closer) {

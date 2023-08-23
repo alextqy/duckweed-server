@@ -34,7 +34,7 @@ func Announcements(userToken string) entity.Result {
 	return res
 }
 
-func AnnouncementGet(userToken string, id string) entity.Result {
+func AnnouncementGet(userToken, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -69,7 +69,7 @@ func AnnouncementGet(userToken string, id string) entity.Result {
 	return res
 }
 
-func AnnouncementAdd(userToken string, content string) entity.Result {
+func AnnouncementAdd(userToken, content string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -120,7 +120,7 @@ func AnnouncementAdd(userToken string, content string) entity.Result {
 	return res
 }
 
-func AnnouncementDel(userToken string, id string) entity.Result {
+func AnnouncementDel(userToken, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,

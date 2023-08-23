@@ -7,7 +7,7 @@ import (
 	model "duckweed-server/Server/Model"
 )
 
-func Dirs(userToken string, order string, parentID string, dirName string) entity.Result {
+func Dirs(userToken, order, parentID, dirName string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -39,7 +39,7 @@ func Dirs(userToken string, order string, parentID string, dirName string) entit
 	return res
 }
 
-func DirAction(userToken string, dirName string, parentID string, id string) entity.Result {
+func DirAction(userToken, dirName, parentID, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,

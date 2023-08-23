@@ -42,7 +42,7 @@ func FileRemove(filePath string) (bool, string) {
 }
 
 // 文件重命名
-func FileRename(filePath string, newName string) (bool, string) {
+func FileRename(filePath, newName string) (bool, string) {
 	err := os.Rename(filePath, newName)
 	if err != nil {
 		return false, err.Error()
@@ -87,7 +87,7 @@ func FileReadBlock(filePath string, buffer int, start int) (bool, string, []byte
 }
 
 // 文件写入
-func FileWrite(filePath string, content string) (bool, string) {
+func FileWrite(filePath, content string) (bool, string) {
 	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0600)
 
 	defer func(f io.Closer) {
@@ -109,7 +109,7 @@ func FileWrite(filePath string, content string) (bool, string) {
 }
 
 // 文件写入追加
-func FileWriteAppend(filePath string, content string) (bool, string) {
+func FileWriteAppend(filePath, content string) (bool, string) {
 	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0666)
 
 	defer func(f io.Closer) {

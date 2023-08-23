@@ -141,7 +141,7 @@ func DeBase64(s64 string) (bool, string, string) {
 	return true, "", string(decoded)
 }
 
-func StringContains(data string, subs string) bool {
+func StringContains(data, subs string) bool {
 	return strings.Contains(data, subs)
 }
 
@@ -161,7 +161,7 @@ data 待加密的明文
 key 秘钥
 vi 向量
 */
-func AesEncrypterCBC(data_s string, key_s string, iv_s string) (bool, string, string) {
+func AesEncrypterCBC(data_s, key_s, iv_s string) (bool, string, string) {
 	data := []byte(data_s)
 	key := []byte(key_s)
 	iv := []byte(iv_s)
@@ -189,7 +189,7 @@ data 待解密的密文
 key 秘钥
 vi 向量
 */
-func AesDecrypterCBC(data_s string, key_s string, iv_s string) (bool, string, string) {
+func AesDecrypterCBC(data_s, key_s, iv_s string) (bool, string, string) {
 	data := []byte(data_s)
 	key := []byte(key_s)
 	iv := []byte(iv_s)
@@ -320,7 +320,7 @@ func LogDir() string {
 	return "../Log/" + strings.Split(TimeNowStr(), " ")[0] + "/"
 }
 
-func WriteLog(fileName string, content string) (bool, string) {
+func WriteLog(fileName, content string) (bool, string) {
 	if !FileExist(LogDir()) {
 		b, s := DirMake(LogDir())
 		if !b {

@@ -7,7 +7,7 @@ import (
 	model "duckweed-server/Server/Model"
 )
 
-func FileAdd(userToken string, fileName string, fileType string, fileSize string, md5 string, dirID string) entity.Result {
+func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -121,7 +121,7 @@ func FileAdd(userToken string, fileName string, fileType string, fileSize string
 	return res
 }
 
-func FileModify(userToken string, id string, fileName string, dirID string) entity.Result {
+func FileModify(userToken, id, fileName, dirID string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -214,7 +214,7 @@ func FileModify(userToken string, id string, fileName string, dirID string) enti
 	return res
 }
 
-func Files(userToken string, order string, fileName string, dirID string) entity.Result {
+func Files(userToken, order, fileName, dirID string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -246,7 +246,7 @@ func Files(userToken string, order string, fileName string, dirID string) entity
 	return res
 }
 
-func FileDel(userToken string, id string) entity.Result {
+func FileDel(userToken, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
