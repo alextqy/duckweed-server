@@ -16,6 +16,16 @@ func SignIn(account, password string) entity.Result {
 		Message: "",
 	}
 
+	if account == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	if password == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
 	b, s, userData := model.UserDataAccount(tx, account)
 	if !b {
 		tx.Rollback()
