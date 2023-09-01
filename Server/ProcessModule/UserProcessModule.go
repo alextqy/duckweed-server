@@ -476,7 +476,43 @@ func UserDel(userToken, id string) entity.Result {
 
 // 用户操作 =============================================================================================================================================
 
-func SignUp(account, name, password, email string) entity.Result {
+func SendEmailSignUp(email string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if email == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	if !lib.RegEmail(email) {
+		res.Message = lang.EmailFormatError
+		return res
+	}
+
+	captcha := lib.RandStr(5) // 验证码
+	b, s := lib.FileMake("../Temp/Captcha/" + captcha)
+	if !b {
+		res.Message = s
+		return res
+	}
+
+	b, s = lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", email, "User registration", captcha) // 发送邮件
+	if !b {
+		res.Message = s
+		return res
+	}
+
+	res.State = true
+
+	return res
+}
+
+func SignUp(account, name, password, email, captcha string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -523,6 +559,14 @@ func SignUp(account, name, password, email string) entity.Result {
 	}
 	if !lib.RegEmail(email) {
 		res.Message = lang.EmailFormatError
+		return res
+	}
+	if captcha == "" {
+		res.Message = lang.IncorrectCaptcha
+		return res
+	}
+	if !lib.FileExist("../Temp/Captcha/" + captcha) {
+		res.Message = lang.IncorrectCaptcha
 		return res
 	}
 

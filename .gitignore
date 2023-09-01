@@ -1,6 +1,7 @@
 desktop.ini
 /.vscode
 /Temp/Upload/*
+/Temp/Captcha/*
 /Log/*
 Dao.db
 /Space/*

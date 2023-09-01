@@ -63,12 +63,18 @@ func UserDel(w http.ResponseWriter, r *http.Request) {
 	HttpWrite(w, processmodule.UserDel(userToken, id))
 }
 
+func SendEmailSignUp(w http.ResponseWriter, r *http.Request) {
+	email := strings.TrimSpace(Post(r, "email"))
+	HttpWrite(w, processmodule.SendEmailSignUp(email))
+}
+
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	account := strings.TrimSpace(Post(r, "account"))
 	name := strings.TrimSpace(Post(r, "name"))
 	password := strings.TrimSpace(Post(r, "password"))
 	email := strings.TrimSpace(Post(r, "email"))
-	HttpWrite(w, processmodule.SignUp(account, name, password, email))
+	captcha := strings.TrimSpace(Post(r, "captcha"))
+	HttpWrite(w, processmodule.SignUp(account, name, password, email, captcha))
 }
 
 func CheckPersonalData(w http.ResponseWriter, r *http.Request) {
