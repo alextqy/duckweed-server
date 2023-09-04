@@ -569,6 +569,7 @@ func SignUp(account, name, password, email, captcha string) entity.Result {
 		res.Message = lang.IncorrectCaptcha
 		return res
 	}
+	lib.FileRemove("../Temp/Captcha/" + captcha)
 
 	_, _, iss := lib.StringToInt(lib.CheckConf().InitialSpaceSize)
 
