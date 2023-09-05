@@ -43,7 +43,7 @@ func main() {
 // 开启内网广播
 func loopBroadcast(ip string, port string) {
 	for {
-		lib.Broadcast(port, ip+":"+port)
+		lib.Broadcast(port, ip+":"+lib.CheckConf().TcpPort)
 		time.Sleep(time.Second)
 	}
 }
