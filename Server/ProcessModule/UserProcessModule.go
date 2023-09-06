@@ -495,7 +495,14 @@ func SendEmailSignUp(email string) entity.Result {
 	}
 
 	captcha := lib.RandStr(5) // 验证码
-	b, s := lib.FileMake("../Temp/Captcha/" + captcha)
+	captchaFile := "../Temp/Captcha/" + captcha
+	b, s := lib.FileMake(captchaFile)
+	if !b {
+		res.Message = s
+		return res
+	}
+
+	b, s = lib.FileWrite(captchaFile, email)
 	if !b {
 		res.Message = s
 		return res
@@ -569,6 +576,16 @@ func SignUp(account, name, password, email, captcha string) entity.Result {
 		res.Message = lang.IncorrectCaptcha
 		return res
 	}
+	b, s := lib.FileRead("../Temp/Captcha/" + captcha)
+	if !b {
+		res.Message = s
+		return res
+	}
+	if s != email {
+		res.Message = lang.EmailError
+		return res
+	}
+
 	lib.FileRemove("../Temp/Captcha/" + captcha)
 
 	_, _, iss := lib.StringToInt(lib.CheckConf().InitialSpaceSize)
