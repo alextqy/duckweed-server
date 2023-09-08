@@ -78,12 +78,11 @@ func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/set/available/space", api.SetAvailableSpace)
 	mux.HandleFunc("/disable/user", api.DisableUser)
 	mux.HandleFunc("/user/del", api.UserDel)
-	mux.HandleFunc("/send/email/sign/up", api.SendEmailSignUp)
 	mux.HandleFunc("/sign/up", api.SignUp)
 	mux.HandleFunc("/check/personal/data", api.CheckPersonalData)
 	mux.HandleFunc("/modify/personal/data", api.ModifyPersonalData)
-	mux.HandleFunc("/send/email", api.SendEmail)
 	mux.HandleFunc("/reset/password", api.ResetPassword)
+	mux.HandleFunc("/send/email", api.SendEmail)
 
 	mux.HandleFunc("/announcements", api.Announcements)
 	mux.HandleFunc("/announcement/get", api.AnnouncementGet)

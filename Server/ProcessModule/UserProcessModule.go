@@ -476,49 +476,6 @@ func UserDel(userToken, id string) entity.Result {
 
 // 用户操作 =============================================================================================================================================
 
-func SendEmailSignUp(email string) entity.Result {
-	lang := lang.Lang()
-	res := entity.Result{
-		State:   false,
-		Code:    200,
-		Message: "",
-		Data:    nil,
-	}
-
-	if email == "" {
-		res.Message = lang.Typo
-		return res
-	}
-	if !lib.RegEmail(email) {
-		res.Message = lang.EmailFormatError
-		return res
-	}
-
-	captcha := lib.RandStr(5) // 验证码
-	captchaFile := "../Temp/Captcha/" + captcha
-	b, s := lib.FileMake(captchaFile)
-	if !b {
-		res.Message = s
-		return res
-	}
-
-	b, s = lib.FileWrite(captchaFile, email)
-	if !b {
-		res.Message = s
-		return res
-	}
-
-	b, s = lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", email, "User registration", captcha) // 发送邮件
-	if !b {
-		res.Message = s
-		return res
-	}
-
-	res.State = true
-
-	return res
-}
-
 func SignUp(account, name, password, email, captcha string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
@@ -744,7 +701,7 @@ func ModifyPersonalData(userToken, name, password, email string) entity.Result {
 	return res
 }
 
-func SendEmail(email string) entity.Result {
+func SendEmail(email string, sendType string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -759,6 +716,14 @@ func SendEmail(email string) entity.Result {
 	}
 	if !lib.RegEmail(email) {
 		res.Message = lang.EmailFormatError
+		return res
+	}
+	if sendType == "" {
+		res.Message = lang.IncorrectSendingType
+		return res
+	}
+	if !lib.RegNum(sendType) {
+		res.Message = lang.IncorrectSendingType
 		return res
 	}
 
@@ -791,7 +756,22 @@ func SendEmail(email string) entity.Result {
 		return res
 	}
 
-	b, s = lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", userData.Email, "Reset Password", captcha) // 发送邮件
+	_, _, sendTypeNum := lib.StringToInt(sendType)
+	if sendTypeNum <= 0 {
+		res.Message = lang.IncorrectSendingType
+		return res
+	}
+	subject := ""
+	if sendTypeNum == 1 {
+		subject = "Reset Password"
+	}
+	if sendTypeNum == 2 {
+		subject = "User registration"
+	}
+	if sendTypeNum == 3 {
+		subject = "Modify email"
+	}
+	b, s = lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", userData.Email, subject, captcha) // 发送邮件
 	if !b {
 		tx.Rollback()
 		res.Message = s

@@ -33,6 +33,7 @@ type language struct {
 	EmailAddressDoesNotExist         string
 	IncorrectCaptcha                 string
 	LogDoesNotExist                  string
+	IncorrectSendingType             string
 }
 
 func Lang() language {
@@ -68,6 +69,7 @@ func Lang() language {
 		l.EmailAddressDoesNotExist = "电子邮箱不存在"
 		l.IncorrectCaptcha = "验证码不正确"
 		l.LogDoesNotExist = "日志不存在"
+		l.IncorrectSendingType = "发送类型错误"
 	} else if lib.CheckConf().Lang == "en" {
 		l.ReLoginRequired = "re-login required"
 		l.NoData = "no data"
@@ -99,6 +101,7 @@ func Lang() language {
 		l.EmailAddressDoesNotExist = "email address does not exist"
 		l.IncorrectCaptcha = "incorrect captcha"
 		l.LogDoesNotExist = "log does not exist"
+		l.IncorrectSendingType = "incorrect sending type"
 	} else {
 		l.ReLoginRequired = ""
 		l.NoData = ""
@@ -130,6 +133,7 @@ func Lang() language {
 		l.EmailAddressDoesNotExist = ""
 		l.IncorrectCaptcha = ""
 		l.LogDoesNotExist = ""
+		l.IncorrectSendingType = ""
 	}
 	return l
 }
