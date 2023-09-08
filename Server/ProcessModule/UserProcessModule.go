@@ -617,7 +617,7 @@ func CheckPersonalData(userToken string) entity.Result {
 	return res
 }
 
-func ModifyPersonalData(userToken, name, password, email string) entity.Result {
+func ModifyPersonalData(userToken, name, password, email, captcha string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -666,6 +666,16 @@ func ModifyPersonalData(userToken, name, password, email string) entity.Result {
 	_, _, tx, db := model.ConnDB()
 
 	if userData.Email != email {
+		if captcha == "" {
+			tx.Rollback()
+			res.Message = lang.IncorrectCaptcha
+			return res
+		}
+		if userData.Captcha != captcha {
+			tx.Rollback()
+			res.Message = lang.IncorrectCaptcha
+			return res
+		}
 		b, s, checkEmail := model.UserDataEmail(tx, email)
 		if !b {
 			tx.Rollback()
@@ -695,90 +705,6 @@ func ModifyPersonalData(userToken, name, password, email string) entity.Result {
 
 	res.State = true
 	res.Data = r
-
-	tx.Commit()
-	db.Close()
-	return res
-}
-
-func SendEmail(email string, sendType string) entity.Result {
-	lang := lang.Lang()
-	res := entity.Result{
-		State:   false,
-		Code:    200,
-		Message: "",
-		Data:    nil,
-	}
-
-	if email == "" {
-		res.Message = lang.Typo
-		return res
-	}
-	if !lib.RegEmail(email) {
-		res.Message = lang.EmailFormatError
-		return res
-	}
-	if sendType == "" {
-		res.Message = lang.IncorrectSendingType
-		return res
-	}
-	if !lib.RegNum(sendType) {
-		res.Message = lang.IncorrectSendingType
-		return res
-	}
-
-	_, _, tx, db := model.ConnDB()
-
-	b, s, userData := model.UserDataEmail(tx, email)
-	if !b {
-		tx.Rollback()
-		res.Message = s
-		return res
-	}
-	if userData.ID == 0 {
-		tx.Rollback()
-		res.Message = lang.EmailAddressDoesNotExist
-		return res
-	}
-
-	captcha := lib.RandStr(5) // 验证码
-
-	userData.Captcha = captcha
-	b, s, r := model.UserUpdate(tx, userData)
-	if !b {
-		tx.Rollback()
-		res.Message = s
-		return res
-	}
-	if r == 0 {
-		tx.Rollback()
-		res.Message = s
-		return res
-	}
-
-	_, _, sendTypeNum := lib.StringToInt(sendType)
-	if sendTypeNum <= 0 {
-		res.Message = lang.IncorrectSendingType
-		return res
-	}
-	subject := ""
-	if sendTypeNum == 1 {
-		subject = "Reset Password"
-	}
-	if sendTypeNum == 2 {
-		subject = "User registration"
-	}
-	if sendTypeNum == 3 {
-		subject = "Modify email"
-	}
-	b, s = lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", userData.Email, subject, captcha) // 发送邮件
-	if !b {
-		tx.Rollback()
-		res.Message = s
-		return res
-	}
-
-	res.State = true
 
 	tx.Commit()
 	db.Close()
@@ -836,6 +762,106 @@ func ResetPassword(newPassword, captcha string) entity.Result {
 	if r == 0 {
 		tx.Rollback()
 		res.Message = lang.OperationFailed
+		return res
+	}
+
+	res.State = true
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
+func SendEmail(email string, sendType string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if email == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	if !lib.RegEmail(email) {
+		res.Message = lang.EmailFormatError
+		return res
+	}
+	if sendType == "" {
+		res.Message = lang.IncorrectSendingType
+		return res
+	}
+	if !lib.RegNum(sendType) {
+		res.Message = lang.IncorrectSendingType
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	captcha := lib.RandStr(5) // 验证码
+
+	_, _, sendTypeNum := lib.StringToInt(sendType)
+	if sendTypeNum <= 0 {
+		res.Message = lang.IncorrectSendingType
+		return res
+	}
+
+	subject := ""
+	if sendTypeNum == 1 {
+		subject = "User registration"
+	}
+	if sendTypeNum == 2 {
+		subject = "Reset Password"
+	}
+	if sendTypeNum == 3 {
+		subject = "Modify email"
+	}
+
+	if sendTypeNum == 1 {
+		captchaFile := "../Temp/Captcha/" + captcha
+		b, s := lib.FileMake(captchaFile)
+		if !b {
+			res.Message = s
+			return res
+		}
+		b, s = lib.FileWrite(captchaFile, email)
+		if !b {
+			res.Message = s
+			return res
+		}
+	} else {
+		b, s, userData := model.UserDataEmail(tx, email)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if userData.ID == 0 {
+			tx.Rollback()
+			res.Message = lang.EmailAddressDoesNotExist
+			return res
+		}
+
+		userData.Captcha = captcha
+		b, s, r := model.UserUpdate(tx, userData)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if r == 0 {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+	}
+
+	b, s := lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", email, subject, captcha) // 发送邮件
+	if !b {
+		tx.Rollback()
+		res.Message = s
 		return res
 	}
 

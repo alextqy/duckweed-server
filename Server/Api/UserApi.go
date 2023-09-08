@@ -82,7 +82,8 @@ func ModifyPersonalData(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimSpace(Post(r, "name"))
 	password := strings.TrimSpace(Post(r, "password"))
 	email := strings.TrimSpace(Post(r, "email"))
-	HttpWrite(w, processmodule.ModifyPersonalData(userToken, name, password, email))
+	captcha := strings.TrimSpace(Post(r, "captcha"))
+	HttpWrite(w, processmodule.ModifyPersonalData(userToken, name, password, email, captcha))
 }
 
 func ResetPassword(w http.ResponseWriter, r *http.Request) {
