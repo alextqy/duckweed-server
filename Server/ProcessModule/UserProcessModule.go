@@ -638,10 +638,6 @@ func ModifyPersonalData(userToken, name, password, email, captcha string) entity
 		res.Message = lang.EmailError
 		return res
 	}
-	if !lib.RegEmail(email) {
-		res.Message = lang.EmailFormatError
-		return res
-	}
 
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
@@ -650,7 +646,6 @@ func ModifyPersonalData(userToken, name, password, email, captcha string) entity
 	}
 
 	userData.Name = name
-	userData.Email = email
 	if password != "" && password != userData.Password {
 		if len(password) < 6 {
 			res.Message = lang.PasswordLengthIsNotEnough
@@ -664,8 +659,11 @@ func ModifyPersonalData(userToken, name, password, email, captcha string) entity
 	}
 
 	_, _, tx, db := model.ConnDB()
-
 	if userData.Email != email {
+		if !lib.RegEmail(email) {
+			res.Message = lang.EmailFormatError
+			return res
+		}
 		if captcha == "" {
 			tx.Rollback()
 			res.Message = lang.IncorrectCaptcha
@@ -687,6 +685,7 @@ func ModifyPersonalData(userToken, name, password, email, captcha string) entity
 			res.Message = lang.EmailAlreadyInUse
 			return res
 		}
+		userData.Email = email
 	}
 
 	b, s, r := model.UserUpdate(tx, userData)
@@ -809,17 +808,15 @@ func SendEmail(email string, sendType string) entity.Result {
 	}
 
 	subject := ""
+	b, s, userData := model.UserDataEmail(tx, email)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
 	if sendTypeNum == 1 {
 		subject = "User registration"
-	}
-	if sendTypeNum == 2 {
-		subject = "Reset Password"
-	}
-	if sendTypeNum == 3 {
-		subject = "Modify email"
-	}
 
-	if sendTypeNum == 1 {
 		captchaFile := "../Temp/Captcha/" + captcha
 		b, s := lib.FileMake(captchaFile)
 		if !b {
@@ -831,13 +828,14 @@ func SendEmail(email string, sendType string) entity.Result {
 			res.Message = s
 			return res
 		}
-	} else {
-		b, s, userData := model.UserDataEmail(tx, email)
-		if !b {
+		if userData.ID > 0 {
 			tx.Rollback()
-			res.Message = s
+			res.Message = lang.EmailAlreadyInUse
 			return res
 		}
+	} else if sendTypeNum == 2 {
+		subject = "Reset Password"
+
 		if userData.ID == 0 {
 			tx.Rollback()
 			res.Message = lang.EmailAddressDoesNotExist
@@ -856,9 +854,34 @@ func SendEmail(email string, sendType string) entity.Result {
 			res.Message = s
 			return res
 		}
+	} else if sendTypeNum == 3 {
+		subject = "Modify email"
+
+		if userData.ID > 0 {
+			tx.Rollback()
+			res.Message = lang.EmailAlreadyInUse
+			return res
+		}
+
+		userData.Captcha = captcha
+		b, s, r := model.UserUpdate(tx, userData)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if r == 0 {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+	} else {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
+		return res
 	}
 
-	b, s := lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", email, subject, captcha) // 发送邮件
+	b, s = lib.SendEmail("tqyalex@qq.com", "qfjhhammjflgbjcc", "Duckweed Server", "smtp.qq.com:587", email, subject, captcha) // 发送邮件
 	if !b {
 		tx.Rollback()
 		res.Message = s
