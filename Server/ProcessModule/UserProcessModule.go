@@ -82,6 +82,7 @@ func SignIn(account, password string) entity.Result {
 	}
 
 	res.State = true
+	res.Message = lib.IntToString(userData.Level)
 	res.Data = userData.UserToken
 
 	tx.Commit()
