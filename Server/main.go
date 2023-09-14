@@ -76,6 +76,7 @@ func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/users", api.Users)
 	mux.HandleFunc("/user/get", api.UserGet)
 	mux.HandleFunc("/set/available/space", api.SetAvailableSpace)
+	mux.HandleFunc("/set/root/account", api.SetRootAccount)
 	mux.HandleFunc("/disable/user", api.DisableUser)
 	mux.HandleFunc("/user/del", api.UserDel)
 	mux.HandleFunc("/sign/up", api.SignUp)

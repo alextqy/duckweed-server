@@ -310,6 +310,77 @@ func SetAvailableSpace(userToken, id, availableSpace string) entity.Result {
 	return res
 }
 
+func SetRootAccount(userToken, id string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	permissions, adminAccount := CheckLevel(userToken)
+	if permissions != 2 {
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, userData := model.UserData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if userData.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.NoData
+		return res
+	}
+
+	if id == "1" {
+		userData.Level = 2
+	} else {
+		if userData.Level == 1 {
+			userData.Level = 2
+		} else if userData.Level == 2 {
+			userData.Level = 1
+		} else {
+			userData.Level = 1
+		}
+	}
+
+	b, s, r := model.UserUpdate(tx, userData)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r == 0 {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
+		return res
+	}
+
+	if userData.Level == 2 {
+		lib.WriteLog(adminAccount, "set user root account: "+userData.Account)
+	} else {
+		lib.WriteLog(adminAccount, "unset user root account: "+userData.Account)
+	}
+
+	res.State = true
+
+	tx.Commit()
+	db.Close()
+	return res
+}
+
 func DisableUser(userToken, id string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{

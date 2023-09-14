@@ -51,6 +51,12 @@ func SetAvailableSpace(w http.ResponseWriter, r *http.Request) {
 	HttpWrite(w, processmodule.SetAvailableSpace(userToken, id, availableSpace))
 }
 
+func SetRootAccount(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	id := strings.TrimSpace(Post(r, "id"))
+	HttpWrite(w, processmodule.SetRootAccount(userToken, id))
+}
+
 func DisableUser(w http.ResponseWriter, r *http.Request) {
 	userToken := strings.TrimSpace(Post(r, "userToken"))
 	id := strings.TrimSpace(Post(r, "id"))
