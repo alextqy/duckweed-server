@@ -8,9 +8,24 @@ import (
 	"math"
 )
 
-func DirCount(db *sql.Tx) int {
+func DirCount(db *sql.Tx, dirName string, parentID int, userID int) int {
 	var count int
-	db.QueryRow("SELECT COUNT(*) FROM Dir").Scan(&count)
+	condition_dirName := "1=1"
+	condition_parentID := "1=1"
+	condition_userID := "1=1"
+	if dirName != "" {
+		condition_dirName = "DirName LIKE '%" + dirName + "%'"
+	}
+	if parentID > 0 {
+		condition_parentID = "ParentID = " + lib.IntToString(parentID)
+	} else {
+		condition_parentID = "ParentID = 0"
+	}
+	if userID > 0 {
+		condition_userID = "UserID = " + lib.IntToString(userID)
+	}
+	sqlCom := "SELECT COUNT(*) FROM Dir WHERE " + condition_dirName + " AND " + condition_parentID + " AND " + condition_userID
+	db.QueryRow(sqlCom).Scan(&count)
 	return count
 }
 
@@ -149,7 +164,7 @@ func DirList(db *sql.Tx, page int, pageSize int, order int, dirName string, pare
 	} else {
 		orderBy = "ASC"
 	}
-	totalPage := math.Ceil(float64(DirCount(db)) / float64(pageSize))
+	totalPage := math.Ceil(float64(DirCount(db, dirName, parentID, userID)) / float64(pageSize))
 	if totalPage > 0 && page > int(totalPage) {
 		page = int(totalPage)
 	}

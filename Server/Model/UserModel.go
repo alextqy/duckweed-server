@@ -8,9 +8,26 @@ import (
 	"math"
 )
 
-func UserCount(db *sql.Tx) int {
+func UserCount(db *sql.Tx, account string, name string, level int, status int) int {
 	var count int
-	db.QueryRow("SELECT COUNT(*) FROM User").Scan(&count)
+	condition_account := "1=1"
+	condition_name := "1=1"
+	condition_level := "1=1"
+	condition_status := "1=1"
+	if account != "" {
+		condition_account = "Account LIKE '%" + account + "%'"
+	}
+	if name != "" {
+		condition_name = "Name LIKE '%" + name + "%'"
+	}
+	if level > 0 {
+		condition_level = "Level = " + lib.IntToString(level)
+	}
+	if status > 0 {
+		condition_status = "Status = " + lib.IntToString(status)
+	}
+	sqlCom := "SELECT COUNT(*) FROM User WHERE " + condition_account + " AND " + condition_name + " AND " + condition_level + " AND " + condition_status
+	db.QueryRow(sqlCom).Scan(&count)
 	return count
 }
 
@@ -208,7 +225,7 @@ func UserList(db *sql.Tx, page int, pageSize int, order int, account string, nam
 	} else {
 		orderBy = "ASC"
 	}
-	totalPage := math.Ceil(float64(UserCount(db)) / float64(pageSize))
+	totalPage := math.Ceil(float64(UserCount(db, account, name, level, status)) / float64(pageSize))
 	if totalPage > 0 && page > int(totalPage) {
 		page = int(totalPage)
 	}

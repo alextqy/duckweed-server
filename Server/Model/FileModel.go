@@ -8,9 +8,24 @@ import (
 	"math"
 )
 
-func FileCount(db *sql.Tx) int {
+func FileCount(db *sql.Tx, fileName string, userID int, dirID int) int {
 	var count int
-	db.QueryRow("SELECT COUNT(*) FROM File").Scan(&count)
+	condition_fileName := "1=1"
+	condition_userID := "1=1"
+	condition_dirID := "1=1"
+	if fileName != "" {
+		condition_fileName = "FileName LIKE '%" + fileName + "%'"
+	}
+	if userID > 0 {
+		condition_userID = "UserID = " + lib.IntToString(userID)
+	}
+	if dirID > 0 {
+		condition_dirID = "DirID = " + lib.IntToString(dirID)
+	} else {
+		condition_dirID = "DirID = 0"
+	}
+	sqlCom := "SELECT COUNT(*) FROM File WHERE " + condition_fileName + " AND " + condition_userID + " AND " + condition_dirID
+	db.QueryRow(sqlCom).Scan(&count)
 	return count
 }
 
@@ -166,7 +181,7 @@ func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, us
 	} else {
 		orderBy = "ASC"
 	}
-	totalPage := math.Ceil(float64(FileCount(db)) / float64(pageSize))
+	totalPage := math.Ceil(float64(FileCount(db, fileName, userID, dirID)) / float64(pageSize))
 	if totalPage > 0 && page > int(totalPage) {
 		page = int(totalPage)
 	}
