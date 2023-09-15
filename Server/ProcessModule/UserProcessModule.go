@@ -154,7 +154,7 @@ func UserList(userToken, page, pageSize, order, account, name, level, status str
 		Data:      nil,
 	}
 
-	permissions, _ := CheckLevel(userToken)
+	permissions, _, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -188,7 +188,7 @@ func Users(userToken, order, account, name, level, status string) entity.Result 
 		Data:    nil,
 	}
 
-	permissions, _ := CheckLevel(userToken)
+	permissions, _, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -219,7 +219,7 @@ func UserGet(userToken, id string) entity.Result {
 		Data:    nil,
 	}
 
-	permissions, _ := CheckLevel(userToken)
+	permissions, _, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -268,7 +268,7 @@ func SetAvailableSpace(userToken, id, availableSpace string) entity.Result {
 		return res
 	}
 
-	permissions, adminAccount := CheckLevel(userToken)
+	permissions, adminAccount, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -324,7 +324,7 @@ func SetRootAccount(userToken, id string) entity.Result {
 		return res
 	}
 
-	permissions, adminAccount := CheckLevel(userToken)
+	permissions, adminAccount, rootID := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -341,6 +341,12 @@ func SetRootAccount(userToken, id string) entity.Result {
 	if userData.ID == 0 {
 		tx.Rollback()
 		res.Message = lang.NoData
+		return res
+	}
+	_, _, idInt := lib.StringToInt(id)
+	if rootID == idInt {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
 		return res
 	}
 
@@ -395,7 +401,7 @@ func DisableUser(userToken, id string) entity.Result {
 		return res
 	}
 
-	permissions, adminAccount := CheckLevel(userToken)
+	permissions, adminAccount, rootID := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -412,6 +418,12 @@ func DisableUser(userToken, id string) entity.Result {
 	if userData.ID == 0 {
 		tx.Rollback()
 		res.Message = lang.NoData
+		return res
+	}
+	_, _, idInt := lib.StringToInt(id)
+	if rootID == idInt {
+		tx.Rollback()
+		res.Message = lang.OperationFailed
 		return res
 	}
 
@@ -461,7 +473,7 @@ func UserDel(userToken, id string) entity.Result {
 		Data:    nil,
 	}
 
-	permissions, adminAccount := CheckLevel(userToken)
+	permissions, adminAccount, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res

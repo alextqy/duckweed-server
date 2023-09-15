@@ -6,28 +6,28 @@ import (
 	model "duckweed-server/Server/Model"
 )
 
-func CheckLevel(userToken string) (int, string) {
+func CheckLevel(userToken string) (int, string, int) {
 	_, _, tx, db := model.ConnDB()
 	if userToken == "" {
 		tx.Rollback()
-		return 0, ""
+		return 0, "", 0
 	}
 	b, _, userData := model.UserDataToken(tx, userToken)
 	if !b {
 		tx.Rollback()
-		return 0, ""
+		return 0, "", 0
 	}
 	if userData.ID == 0 {
 		tx.Rollback()
-		return 0, ""
+		return 0, "", 0
 	}
 	if userData.Status == 2 {
 		tx.Rollback()
-		return 0, ""
+		return 0, "", 0
 	}
 	tx.Commit()
 	db.Close()
-	return userData.Level, userData.Account
+	return userData.Level, userData.Account, userData.ID
 }
 
 func CheckToken(userToken string) entity.UserEntity {

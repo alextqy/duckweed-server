@@ -16,7 +16,7 @@ func Announcements(userToken string) entity.Result {
 		Data:    nil,
 	}
 
-	permissions, _ := CheckLevel(userToken)
+	permissions, _, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -43,7 +43,7 @@ func AnnouncementGet(userToken, id string) entity.Result {
 		Data:    nil,
 	}
 
-	permissions, _ := CheckLevel(userToken)
+	permissions, _, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -78,7 +78,7 @@ func AnnouncementAdd(userToken, content string) entity.Result {
 		Data:    nil,
 	}
 
-	permissions, adminAccount := CheckLevel(userToken)
+	permissions, adminAccount, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
@@ -129,7 +129,7 @@ func AnnouncementDel(userToken, id string) entity.Result {
 		Data:    nil,
 	}
 
-	permissions, adminAccount := CheckLevel(userToken)
+	permissions, adminAccount, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res

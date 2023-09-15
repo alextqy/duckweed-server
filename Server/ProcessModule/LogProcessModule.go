@@ -24,7 +24,7 @@ func ViewLog(userToken, date, account string) entity.Result {
 		return res
 	}
 
-	permissions, _ := CheckLevel(userToken)
+	permissions, _, _ := CheckLevel(userToken)
 	if permissions != 2 {
 		res.Message = lang.NoPermission
 		return res
