@@ -60,10 +60,13 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 		res.Message = lang.Typo
 		return res
 	}
-	if parentID == id {
-		res.Message = lang.OperationFailed
+
+	_, _, idInt := lib.StringToInt(id)
+	if idInt < 0 {
+		res.Message = lang.Typo
 		return res
 	}
+
 	_, _, parentIDInt := lib.StringToInt(parentID)
 	if parentIDInt < 0 {
 		res.Message = lang.Typo
@@ -79,6 +82,11 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 	_, _, tx, db := model.ConnDB()
 
 	if parentIDInt > 0 {
+		if parentIDInt == idInt {
+			res.Message = lang.OperationFailed
+			return res
+		}
+
 		b, s, r := model.DirData(tx, parentID)
 		if !b {
 			tx.Rollback()
@@ -103,7 +111,6 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 	dir.DirName = dirName
 	dir.ParentID = parentIDInt
 	dir.UserID = userData.ID
-	_, _, idInt := lib.StringToInt(id)
 
 	if idInt > 0 {
 		b, s, dirData := model.DirData(tx, id)
