@@ -5,6 +5,7 @@ import (
 	lang "duckweed-server/Server/Lang"
 	lib "duckweed-server/Server/Lib"
 	model "duckweed-server/Server/Model"
+	"strings"
 )
 
 func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID string) entity.Result {
@@ -268,25 +269,52 @@ func FileDel(userToken, id string) entity.Result {
 
 	_, _, tx, db := model.ConnDB()
 
-	b, s, fileData := model.FileData(tx, id)
-	if !b {
-		tx.Rollback()
-		res.Message = s
-		return res
-	}
-	if fileData.ID == 0 {
-		tx.Rollback()
-		res.Message = lang.NoData
-		return res
-	}
-	if fileData.UserID != userData.ID {
-		tx.Rollback()
-		res.Message = lang.NoPermission
-		return res
-	}
+	logContent := ""
+	if lib.StringContains(id, ",") {
+		idArr := strings.Split(id, ",")
+		for i := 0; i < len(idArr); i++ {
+			b, s, fileData := model.FileData(tx, idArr[i])
+			if !b {
+				tx.Rollback()
+				res.Message = s
+				return res
+			}
+			if fileData.ID == 0 {
+				tx.Rollback()
+				res.Message = lang.NoData
+				return res
+			}
+			if fileData.UserID != userData.ID {
+				tx.Rollback()
+				res.Message = lang.NoPermission
+				return res
+			}
+		}
 
-	if fileData.FileType != "" {
-		fileData.FileType = "." + fileData.FileType
+		logContent = " delete file data id: " + id
+	} else {
+		b, s, fileData := model.FileData(tx, id)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if fileData.ID == 0 {
+			tx.Rollback()
+			res.Message = lang.NoData
+			return res
+		}
+		if fileData.UserID != userData.ID {
+			tx.Rollback()
+			res.Message = lang.NoPermission
+			return res
+		}
+
+		if fileData.FileType != "" {
+			fileData.FileType = "." + fileData.FileType
+		}
+
+		logContent = " delete file data " + fileData.FileName + fileData.FileType
 	}
 
 	b, s, r := model.FileDel(tx, id)
@@ -301,7 +329,7 @@ func FileDel(userToken, id string) entity.Result {
 		return res
 	}
 
-	lib.WriteLog(userData.Account, " delete file data "+fileData.FileName+fileData.FileType)
+	lib.WriteLog(userData.Account, logContent)
 
 	res.State = true
 
