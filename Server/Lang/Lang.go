@@ -40,7 +40,7 @@ func Lang() language {
 	l := language{}
 	if lib.CheckConf().Lang == "zh" {
 		l.ReLoginRequired = "需要重新登录"
-		l.NoData = "无数据"
+		l.NoData = "数据不存在"
 		l.IncorrectPassword = "密码错误"
 		l.PasswordLengthIsNotEnough = "密码长度不够"
 		l.PasswordFormatError = "密码格式错误"

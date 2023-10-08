@@ -181,3 +181,41 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 	db.Close()
 	return res
 }
+
+func DirInfo(userToken, id string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, r := model.DirData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	if r.ID > 0 && r.UserID != userData.ID {
+		tx.Rollback()
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	res.State = true
+	res.Data = r
+
+	tx.Commit()
+	db.Close()
+	return res
+}

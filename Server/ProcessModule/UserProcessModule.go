@@ -238,6 +238,7 @@ func UserGet(userToken, id string) entity.Result {
 		return res
 	}
 
+	res.State = true
 	res.Data = r
 
 	tx.Commit()
