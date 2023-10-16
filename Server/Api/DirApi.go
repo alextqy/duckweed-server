@@ -29,7 +29,7 @@ func DirInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 func DirDel(w http.ResponseWriter, r *http.Request) {
-	// userToken := strings.TrimSpace(Post(r, "userToken"))
-	// id := strings.TrimSpace(Post(r, "id"))
-	// HttpWrite(w, processmodule.DirDel(userToken, id))
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	id := strings.TrimSpace(Post(r, "id"))
+	HttpWrite(w, processmodule.DirDel(userToken, id))
 }

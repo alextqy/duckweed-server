@@ -1,6 +1,7 @@
 package processmodule
 
 import (
+	"database/sql"
 	entity "duckweed-server/Server/Entity"
 	lang "duckweed-server/Server/Lang"
 	lib "duckweed-server/Server/Lib"
@@ -218,4 +219,90 @@ func DirInfo(userToken, id string) entity.Result {
 	tx.Commit()
 	db.Close()
 	return res
+}
+
+func DirDel(userToken, id string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, r := model.DirData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r.UserID != userData.ID {
+		tx.Rollback()
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	b, s = dirRec(tx, id, userData.ID)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	tx.Commit()
+	db.Close()
+
+	return res
+}
+
+func dirRec(tx *sql.Tx, id string, userID int) (bool, string) {
+	lang := lang.Lang()
+
+	_, _, idInt := lib.StringToInt(id)
+
+	fileList := model.Files(tx, 0, "", userID, idInt)
+	if len(fileList) > 0 {
+		for i := 0; i < len(fileList); i++ {
+			if fileList[i].Status == 1 {
+				return false, lang.AbnormalFileStatus
+			}
+		}
+	}
+
+	// 删除文件
+	b, s, _ := model.FileDelDir(tx, id)
+	if !b {
+		return false, s
+	}
+
+	// 删除文件夹
+	dirList := model.Dirs(tx, 0, "", idInt, userID)
+	if len(dirList) > 0 {
+		for i := 0; i < len(dirList); i++ {
+			b, s := dirRec(tx, lib.IntToString(dirList[i].ID), userID)
+			if !b {
+				return b, s
+			}
+		}
+	}
+
+	b, s, _ = model.DirDel(tx, id)
+	if !b {
+		return b, s
+	}
+
+	return true, ""
 }

@@ -233,6 +233,23 @@ func FileDel(db *sql.Tx, id string) (bool, string, int) {
 	}
 }
 
+func FileDelDir(db *sql.Tx, dirID string) (bool, string, int) {
+	sqlCom := "DELETE FROM File WHERE DirID=?"
+	stmt, err := db.Prepare(sqlCom)
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	res, err := stmt.Exec(dirID)
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	affect, err := res.RowsAffected()
+	if err != nil {
+		return false, err.Error(), 0
+	}
+	return true, "", int(affect)
+}
+
 func FileDelUser(db *sql.Tx, userID string) (bool, string, int) {
 	sqlCom := "DELETE FROM File WHERE UserID=?"
 	stmt, err := db.Prepare(sqlCom)

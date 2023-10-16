@@ -34,6 +34,7 @@ type language struct {
 	IncorrectCaptcha                 string
 	LogDoesNotExist                  string
 	IncorrectSendingType             string
+	AbnormalFileStatus               string
 }
 
 func Lang() language {
@@ -70,6 +71,7 @@ func Lang() language {
 		l.IncorrectCaptcha = "验证码不正确"
 		l.LogDoesNotExist = "日志不存在"
 		l.IncorrectSendingType = "发送类型错误"
+		l.AbnormalFileStatus = "文件状态异常"
 	} else if lib.CheckConf().Lang == "en" {
 		l.ReLoginRequired = "re-login required"
 		l.NoData = "no data"
@@ -102,6 +104,7 @@ func Lang() language {
 		l.IncorrectCaptcha = "incorrect captcha"
 		l.LogDoesNotExist = "log does not exist"
 		l.IncorrectSendingType = "incorrect sending type"
+		l.AbnormalFileStatus = "abnormal file status"
 	} else {
 		l.ReLoginRequired = ""
 		l.NoData = ""
@@ -134,6 +137,7 @@ func Lang() language {
 		l.IncorrectCaptcha = ""
 		l.LogDoesNotExist = ""
 		l.IncorrectSendingType = ""
+		l.AbnormalFileStatus = ""
 	}
 	return l
 }
