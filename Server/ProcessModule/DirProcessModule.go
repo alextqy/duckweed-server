@@ -130,6 +130,11 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 			res.Message = lang.NoPermission
 			return res
 		}
+		if dirData.ID == parentIDInt {
+			tx.Rollback()
+			res.Message = lang.Typo
+			return res
+		}
 
 		if sd.ID > 0 && sd.ID != idInt && sd.DirName == dirName {
 			tx.Rollback()
