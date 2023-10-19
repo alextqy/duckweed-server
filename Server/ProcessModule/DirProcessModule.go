@@ -267,6 +267,7 @@ func DirDel(userToken, id string) entity.Result {
 		return res
 	}
 
+	res.State = true
 	tx.Commit()
 	db.Close()
 
