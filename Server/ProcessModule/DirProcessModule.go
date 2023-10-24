@@ -6,6 +6,7 @@ import (
 	lang "duckweed-server/Server/Lang"
 	lib "duckweed-server/Server/Lib"
 	model "duckweed-server/Server/Model"
+	"strings"
 )
 
 func Dirs(userToken, order, parentID, dirName string) entity.Result {
@@ -211,7 +212,11 @@ func DirInfo(userToken, id string) entity.Result {
 		res.Message = s
 		return res
 	}
-
+	if r.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.DirectoryDoesNotExist
+		return res
+	}
 	if r.ID > 0 && r.UserID != userData.ID {
 		tx.Rollback()
 		res.Message = lang.NoPermission
@@ -254,6 +259,11 @@ func DirDel(userToken, id string) entity.Result {
 		res.Message = s
 		return res
 	}
+	if r.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.DirectoryDoesNotExist
+		return res
+	}
 	if r.UserID != userData.ID {
 		tx.Rollback()
 		res.Message = lang.NoPermission
@@ -266,6 +276,8 @@ func DirDel(userToken, id string) entity.Result {
 		res.Message = s
 		return res
 	}
+
+	lib.WriteLog(userData.Account, "delete folder "+r.DirName)
 
 	res.State = true
 	tx.Commit()
@@ -311,4 +323,106 @@ func dirRec(tx *sql.Tx, id string, userID int) (bool, string) {
 	}
 
 	return true, ""
+}
+
+func DirMove(userToken, id, ids string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	if ids == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, r := model.DirData(tx, id)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.DirectoryDoesNotExist
+		return res
+	}
+	if r.UserID != userData.ID {
+		tx.Rollback()
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	logInfo := ""
+	if lib.StringContains(id, ",") {
+		idArr := strings.Split(ids, ",")
+		for i := 0; i < len(idArr); i++ {
+			b, s, r := model.DirData(tx, idArr[i])
+			if !b {
+				tx.Rollback()
+				res.Message = s
+				return res
+			}
+			if r.ID == 0 {
+				tx.Rollback()
+				res.Message = lang.DirectoryDoesNotExist
+				return res
+			}
+			if r.UserID != userData.ID {
+				tx.Rollback()
+				res.Message = lang.NoPermission
+				return res
+			}
+			logInfo += "," + r.DirName
+		}
+	} else {
+		b, s, r := model.DirData(tx, ids)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if r.ID == 0 {
+			tx.Rollback()
+			res.Message = lang.DirectoryDoesNotExist
+			return res
+		}
+		if r.UserID != userData.ID {
+			tx.Rollback()
+			res.Message = lang.NoPermission
+			return res
+		}
+		logInfo = r.DirName
+	}
+
+	b, s, _ = model.DirMove(tx, id, ids)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	lib.WriteLog(userData.Account, "move folder "+logInfo)
+
+	res.State = true
+	tx.Commit()
+	db.Close()
+
+	return res
 }

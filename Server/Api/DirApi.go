@@ -33,3 +33,10 @@ func DirDel(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimSpace(Post(r, "id"))
 	HttpWrite(w, processmodule.DirDel(userToken, id))
 }
+
+func DirMove(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	id := strings.TrimSpace(Post(r, "id"))
+	ids := strings.TrimSpace(Post(r, "ids"))
+	HttpWrite(w, processmodule.DirMove(userToken, id, ids))
+}

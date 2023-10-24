@@ -232,3 +232,32 @@ func DirDelUser(db *sql.Tx, userID string) (bool, string, int) {
 	}
 	return true, "", int(affect)
 }
+
+func DirMove(db *sql.Tx, id, ids string) (bool, string, int) {
+	if lib.StringContains(id, ",") {
+		res, err := db.Exec("UPDATE Dir SET ParentID=" + id + " WHERE ID IN (" + ids + ")")
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		affect, err := res.RowsAffected()
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		return true, "", int(affect)
+	} else {
+		sqlCom := "UPDATE Dir SET ParentID=? WHERE ID=?"
+		stmt, err := db.Prepare(sqlCom)
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		res, err := stmt.Exec(id, ids)
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		affect, err := res.RowsAffected()
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		return true, "", int(affect)
+	}
+}

@@ -96,6 +96,7 @@ func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/dir/action", api.DirAction)
 	mux.HandleFunc("/dir/info", api.DirInfo)
 	mux.HandleFunc("/dir/del", api.DirDel)
+	mux.HandleFunc("/dir/move", api.DirMove)
 
 	mux.HandleFunc("/file/add", api.FileAdd)
 	mux.HandleFunc("/file/modify", api.FileModify)
