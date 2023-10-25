@@ -17,6 +17,12 @@ func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID string) entity.
 		Data:    nil,
 	}
 
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
 	if fileName == "" {
 		res.Message = lang.Typo
 		return res
@@ -52,12 +58,6 @@ func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID string) entity.
 	}
 	if dirIDInt < 0 {
 		res.Message = lang.Typo
-		return res
-	}
-
-	userData := CheckToken(userToken)
-	if userData.ID == 0 {
-		res.Message = lang.ReLoginRequired
 		return res
 	}
 
@@ -131,6 +131,12 @@ func FileModify(userToken, id, fileName, dirID string) entity.Result {
 		Data:    nil,
 	}
 
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
 	if id == "" {
 		res.Message = lang.Typo
 		return res
@@ -150,12 +156,6 @@ func FileModify(userToken, id, fileName, dirID string) entity.Result {
 	_, _, dirIDInt := lib.StringToInt(dirID)
 	if dirIDInt < 0 {
 		res.Message = lang.Typo
-		return res
-	}
-
-	userData := CheckToken(userToken)
-	if userData.ID == 0 {
-		res.Message = lang.ReLoginRequired
 		return res
 	}
 
@@ -224,16 +224,16 @@ func Files(userToken, order, fileName, dirID string) entity.Result {
 		Data:    nil,
 	}
 
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
 	_, _, orderInt := lib.StringToInt(order)
 	_, _, dirIDInt := lib.StringToInt(dirID)
 	if dirIDInt < 0 {
 		res.Message = lang.Typo
-		return res
-	}
-
-	userData := CheckToken(userToken)
-	if userData.ID == 0 {
-		res.Message = lang.ReLoginRequired
 		return res
 	}
 
@@ -256,14 +256,14 @@ func FileDel(userToken, id string) entity.Result {
 		Data:    nil,
 	}
 
-	if id == "" {
-		res.Message = lang.Typo
-		return res
-	}
-
 	userData := CheckToken(userToken)
 	if userData.ID == 0 {
 		res.Message = lang.ReLoginRequired
+		return res
+	}
+
+	if id == "" {
+		res.Message = lang.Typo
 		return res
 	}
 
@@ -333,6 +333,107 @@ func FileDel(userToken, id string) entity.Result {
 
 	res.State = true
 
+	tx.Commit()
+	db.Close()
+	return res
+}
+
+func FileMove(userToken, dirID, ids string) entity.Result {
+	lang := lang.Lang()
+	res := entity.Result{
+		State:   false,
+		Code:    200,
+		Message: "",
+		Data:    nil,
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
+	if dirID == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	if ids == "" {
+		res.Message = lang.Typo
+		return res
+	}
+
+	_, _, tx, db := model.ConnDB()
+
+	b, s, r := model.DirData(tx, dirID)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+	if r.ID == 0 {
+		tx.Rollback()
+		res.Message = lang.DirectoryDoesNotExist
+		return res
+	}
+	if r.UserID != userData.ID {
+		tx.Rollback()
+		res.Message = lang.NoPermission
+		return res
+	}
+
+	logInfo := ""
+	if lib.StringContains(ids, ",") {
+		idArr := strings.Split(ids, ",")
+		for i := 0; i < len(idArr); i++ {
+			b, s, r := model.FileData(tx, idArr[i])
+			if !b {
+				tx.Rollback()
+				res.Message = s
+				return res
+			}
+			if r.ID == 0 {
+				tx.Rollback()
+				res.Message = lang.FileDoesNotExist
+				return res
+			}
+			if r.UserID != userData.ID {
+				tx.Rollback()
+				res.Message = lang.NoPermission
+				return res
+			}
+			logInfo += "," + r.FileName
+		}
+	} else {
+		b, s, r := model.FileData(tx, ids)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if r.ID == 0 {
+			tx.Rollback()
+			res.Message = lang.FileDoesNotExist
+			return res
+		}
+		if r.UserID != userData.ID {
+			tx.Rollback()
+			res.Message = lang.NoPermission
+			return res
+		}
+		logInfo = r.FileName
+	}
+
+	b, s, _ = model.FileMove(tx, dirID, ids)
+	if !b {
+		tx.Rollback()
+		res.Message = s
+		return res
+	}
+
+	lib.WriteLog(userData.Account, "move file "+logInfo)
+
+	res.State = true
 	tx.Commit()
 	db.Close()
 	return res

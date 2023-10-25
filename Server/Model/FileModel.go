@@ -266,3 +266,32 @@ func FileDelUser(db *sql.Tx, userID string) (bool, string, int) {
 	}
 	return true, "", int(affect)
 }
+
+func FileMove(db *sql.Tx, dirID, ids string) (bool, string, int) {
+	if lib.StringContains(ids, ",") {
+		res, err := db.Exec("UPDATE File SET DirID=" + dirID + " WHERE ID IN (" + ids + ")")
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		affect, err := res.RowsAffected()
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		return true, "", int(affect)
+	} else {
+		sqlCom := "UPDATE File SET DirID=? WHERE ID=?"
+		stmt, err := db.Prepare(sqlCom)
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		res, err := stmt.Exec(dirID, ids)
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		affect, err := res.RowsAffected()
+		if err != nil {
+			return false, err.Error(), 0
+		}
+		return true, "", int(affect)
+	}
+}

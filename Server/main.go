@@ -102,6 +102,7 @@ func routes(mux *http.ServeMux) {
 	mux.HandleFunc("/file/modify", api.FileModify)
 	mux.HandleFunc("/files", api.Files)
 	mux.HandleFunc("/file/del", api.FileDel)
+	mux.HandleFunc("/file/move", api.FileMove)
 	mux.HandleFunc("/file/upload", api.FileUpload)     // x
 	mux.HandleFunc("/file/download", api.FileDownload) // x
 }

@@ -38,6 +38,13 @@ func FileDel(w http.ResponseWriter, r *http.Request) {
 	HttpWrite(w, processmodule.FileDel(userToken, id))
 }
 
+func FileMove(w http.ResponseWriter, r *http.Request) {
+	userToken := strings.TrimSpace(Post(r, "userToken"))
+	id := strings.TrimSpace(Post(r, "id"))
+	ids := strings.TrimSpace(Post(r, "ids"))
+	HttpWrite(w, processmodule.FileMove(userToken, id, ids))
+}
+
 func FileUpload(w http.ResponseWriter, r *http.Request) {
 	// userToken := strings.TrimSpace(Post(r, "userToken"))
 	// id := strings.TrimSpace(Post(r, "id"))

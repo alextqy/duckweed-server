@@ -18,16 +18,16 @@ func Dirs(userToken, order, parentID, dirName string) entity.Result {
 		Data:    nil,
 	}
 
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
+	}
+
 	_, _, orderInt := lib.StringToInt(order)
 	_, _, parentIDInt := lib.StringToInt(parentID)
 	if parentIDInt < 0 {
 		res.Message = lang.Typo
-		return res
-	}
-
-	userData := CheckToken(userToken)
-	if userData.ID == 0 {
-		res.Message = lang.ReLoginRequired
 		return res
 	}
 
@@ -48,6 +48,12 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 		Code:    200,
 		Message: "",
 		Data:    nil,
+	}
+
+	userData := CheckToken(userToken)
+	if userData.ID == 0 {
+		res.Message = lang.ReLoginRequired
+		return res
 	}
 
 	if dirName == "" {
@@ -72,12 +78,6 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 	_, _, parentIDInt := lib.StringToInt(parentID)
 	if parentIDInt < 0 {
 		res.Message = lang.Typo
-		return res
-	}
-
-	userData := CheckToken(userToken)
-	if userData.ID == 0 {
-		res.Message = lang.ReLoginRequired
 		return res
 	}
 
@@ -370,8 +370,15 @@ func DirMove(userToken, id, ids string) entity.Result {
 	}
 
 	logInfo := ""
-	if lib.StringContains(id, ",") {
+	if lib.StringContains(ids, ",") {
 		idArr := strings.Split(ids, ",")
+		for i := 0; i < len(idArr); i++ {
+			if idArr[i] == id {
+				tx.Rollback()
+				res.Message = lang.Typo
+				return res
+			}
+		}
 		for i := 0; i < len(idArr); i++ {
 			b, s, r := model.DirData(tx, idArr[i])
 			if !b {
@@ -392,6 +399,11 @@ func DirMove(userToken, id, ids string) entity.Result {
 			logInfo += "," + r.DirName
 		}
 	} else {
+		if ids == id {
+			tx.Rollback()
+			res.Message = lang.Typo
+			return res
+		}
 		b, s, r := model.DirData(tx, ids)
 		if !b {
 			tx.Rollback()
