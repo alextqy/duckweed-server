@@ -234,7 +234,7 @@ func DirDelUser(db *sql.Tx, userID string) (bool, string, int) {
 }
 
 func DirMove(db *sql.Tx, id, ids string) (bool, string, int) {
-	if lib.StringContains(id, ",") {
+	if lib.StringContains(ids, ",") {
 		res, err := db.Exec("UPDATE Dir SET ParentID=" + id + " WHERE ID IN (" + ids + ")")
 		if err != nil {
 			return false, err.Error(), 0
