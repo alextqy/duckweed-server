@@ -352,21 +352,24 @@ func DirMove(userToken, id, ids string) entity.Result {
 
 	_, _, tx, db := model.ConnDB()
 
-	b, s, r := model.DirData(tx, id)
-	if !b {
-		tx.Rollback()
-		res.Message = s
-		return res
-	}
-	if r.ID == 0 {
-		tx.Rollback()
-		res.Message = lang.DirectoryDoesNotExist
-		return res
-	}
-	if r.UserID != userData.ID {
-		tx.Rollback()
-		res.Message = lang.NoPermission
-		return res
+	_, _, idInt := lib.StringToInt(id)
+	if idInt > 0 {
+		b, s, r := model.DirData(tx, id)
+		if !b {
+			tx.Rollback()
+			res.Message = s
+			return res
+		}
+		if r.ID == 0 {
+			tx.Rollback()
+			res.Message = lang.DirectoryDoesNotExist
+			return res
+		}
+		if r.UserID != userData.ID {
+			tx.Rollback()
+			res.Message = lang.NoPermission
+			return res
+		}
 	}
 
 	logInfo := ""
@@ -423,7 +426,7 @@ func DirMove(userToken, id, ids string) entity.Result {
 		logInfo = r.DirName
 	}
 
-	b, s, _ = model.DirMove(tx, id, ids)
+	b, s, _ := model.DirMove(tx, id, ids)
 	if !b {
 		tx.Rollback()
 		res.Message = s
