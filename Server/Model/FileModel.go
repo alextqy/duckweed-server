@@ -113,11 +113,12 @@ func FileDataMD5(db *sql.Tx, md5 string) (bool, string, entity.FileEntity) {
 	return true, "", data
 }
 
-func Files(db *sql.Tx, order int, fileName string, userID int, dirID int) []entity.FileEntity {
+func Files(db *sql.Tx, order int, fileName string, userID int, dirID int, status int) []entity.FileEntity {
 	datas := []entity.FileEntity{}
 	condition_fileName := "1=1"
 	condition_userID := "1=1"
 	condition_dirID := "1=1"
+	condition_status := "1=1"
 	if fileName != "" {
 		condition_fileName = "FileName LIKE '%" + fileName + "%'"
 	}
@@ -129,13 +130,16 @@ func Files(db *sql.Tx, order int, fileName string, userID int, dirID int) []enti
 	} else {
 		condition_dirID = "DirID = 0"
 	}
+	if status > 0 {
+		condition_status = "Status = " + lib.IntToString(status)
+	}
 	orderBy := ""
 	if order == -1 {
 		orderBy = "DESC"
 	} else {
 		orderBy = "ASC"
 	}
-	sqlCom := "SELECT * FROM File WHERE " + condition_fileName + " AND " + condition_userID + " AND " + condition_dirID + " ORDER BY ID " + orderBy
+	sqlCom := "SELECT * FROM File WHERE " + condition_fileName + " AND " + condition_userID + " AND " + condition_dirID + " AND " + condition_status + " ORDER BY ID " + orderBy
 	rows, err := db.Query(sqlCom)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -153,11 +157,12 @@ func Files(db *sql.Tx, order int, fileName string, userID int, dirID int) []enti
 	return datas
 }
 
-func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, userID int, dirID int) (int, int, int, []entity.FileEntity) {
+func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, userID int, dirID int, status int) (int, int, int, []entity.FileEntity) {
 	datas := []entity.FileEntity{}
 	condition_fileName := "1=1"
 	condition_userID := "1=1"
 	condition_dirID := "1=1"
+	condition_status := "1=1"
 	if fileName != "" {
 		condition_fileName = "FileName LIKE '%" + fileName + "%'"
 	}
@@ -168,6 +173,9 @@ func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, us
 		condition_dirID = "DirID = " + lib.IntToString(dirID)
 	} else {
 		condition_dirID = "DirID = 0"
+	}
+	if status > 0 {
+		condition_status = "Status = " + lib.IntToString(status)
 	}
 	if page <= 1 {
 		page = 1
@@ -185,8 +193,7 @@ func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, us
 	if totalPage > 0 && page > int(totalPage) {
 		page = int(totalPage)
 	}
-	sqlCom := "SELECT * FROM File WHERE " + condition_fileName + " AND " + condition_userID + " AND " + condition_dirID +
-		" ORDER BY ID " + orderBy + " LIMIT " + lib.IntToString(pageSize) + " OFFSET " + lib.IntToString((page-1)*pageSize)
+	sqlCom := "SELECT * FROM File WHERE " + condition_fileName + " AND " + condition_userID + " AND " + condition_dirID + " AND " + condition_status + " ORDER BY ID " + orderBy + " LIMIT " + lib.IntToString(pageSize) + " OFFSET " + lib.IntToString((page-1)*pageSize)
 	rows, err := db.Query(sqlCom)
 	if err != nil {
 		fmt.Println(err.Error())

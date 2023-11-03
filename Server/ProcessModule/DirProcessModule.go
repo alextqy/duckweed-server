@@ -291,7 +291,7 @@ func dirRec(tx *sql.Tx, id string, userID int) (bool, string) {
 
 	_, _, idInt := lib.StringToInt(id)
 
-	fileList := model.Files(tx, 0, "", userID, idInt)
+	fileList := model.Files(tx, 0, "", userID, idInt, 0)
 	if len(fileList) > 0 {
 		for i := 0; i < len(fileList); i++ {
 			if fileList[i].Status == 1 {

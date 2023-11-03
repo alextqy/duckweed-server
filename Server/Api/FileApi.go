@@ -29,7 +29,8 @@ func Files(w http.ResponseWriter, r *http.Request) {
 	order := strings.TrimSpace(Post(r, "order"))
 	fileName := strings.TrimSpace(Post(r, "fileName"))
 	dirID := strings.TrimSpace(Post(r, "dirID"))
-	HttpWrite(w, processmodule.Files(userToken, order, fileName, dirID))
+	status := strings.TrimSpace(Post(r, "status"))
+	HttpWrite(w, processmodule.Files(userToken, order, fileName, dirID, status))
 }
 
 func FileDel(w http.ResponseWriter, r *http.Request) {

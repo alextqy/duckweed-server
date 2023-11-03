@@ -215,7 +215,7 @@ func FileModify(userToken, id, fileName, dirID string) entity.Result {
 	return res
 }
 
-func Files(userToken, order, fileName, dirID string) entity.Result {
+func Files(userToken, order, fileName, dirID, status string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -232,7 +232,12 @@ func Files(userToken, order, fileName, dirID string) entity.Result {
 
 	_, _, orderInt := lib.StringToInt(order)
 	_, _, dirIDInt := lib.StringToInt(dirID)
+	_, _, statusInt := lib.StringToInt(status)
 	if dirIDInt < 0 {
+		res.Message = lang.Typo
+		return res
+	}
+	if statusInt < 0 {
 		res.Message = lang.Typo
 		return res
 	}
@@ -240,7 +245,7 @@ func Files(userToken, order, fileName, dirID string) entity.Result {
 	_, _, tx, db := model.ConnDB()
 
 	res.State = true
-	res.Data = model.Files(tx, orderInt, fileName, userData.ID, dirIDInt)
+	res.Data = model.Files(tx, orderInt, fileName, userData.ID, dirIDInt, statusInt)
 
 	tx.Commit()
 	db.Close()
