@@ -13,7 +13,8 @@ func FileAdd(w http.ResponseWriter, r *http.Request) {
 	fileSize := strings.TrimSpace(Post(r, "fileSize"))
 	md5 := strings.TrimSpace(Post(r, "md5"))
 	dirID := strings.TrimSpace(Post(r, "dirID"))
-	HttpWrite(w, processmodule.FileAdd(userToken, fileName, fileType, fileSize, md5, dirID))
+	sourceAddress := strings.TrimSpace(Post(r, "sourceAddress"))
+	HttpWrite(w, processmodule.FileAdd(userToken, fileName, fileType, fileSize, md5, dirID, sourceAddress))
 }
 
 func FileModify(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,8 @@ func FileModify(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimSpace(Post(r, "id"))
 	fileName := strings.TrimSpace(Post(r, "fileName"))
 	dirID := strings.TrimSpace(Post(r, "dirID"))
-	HttpWrite(w, processmodule.FileModify(userToken, id, fileName, dirID))
+	sourceAddress := strings.TrimSpace(Post(r, "sourceAddress"))
+	HttpWrite(w, processmodule.FileModify(userToken, id, fileName, dirID, sourceAddress))
 }
 
 func Files(w http.ResponseWriter, r *http.Request) {

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID string) entity.Result {
+func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID, sourceAddress string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -46,6 +46,10 @@ func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID string) entity.
 		return res
 	}
 	if dirID == "" {
+		res.Message = lang.Typo
+		return res
+	}
+	if sourceAddress == "" {
 		res.Message = lang.Typo
 		return res
 	}
@@ -88,6 +92,7 @@ func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID string) entity.
 	file.UserID = userData.ID
 	file.DirID = dirIDInt
 	file.OutreachID = outreachID
+	file.SourceAddress = sourceAddress
 
 	b, s, r := model.FileAdd(tx, file)
 	if !b {
@@ -122,7 +127,7 @@ func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID string) entity.
 	return res
 }
 
-func FileModify(userToken, id, fileName, dirID string) entity.Result {
+func FileModify(userToken, id, fileName, dirID, sourceAddress string) entity.Result {
 	lang := lang.Lang()
 	res := entity.Result{
 		State:   false,
@@ -193,6 +198,7 @@ func FileModify(userToken, id, fileName, dirID string) entity.Result {
 	}
 
 	fileData.FileName = fileName
+	fileData.SourceAddress = sourceAddress
 	b, s, r := model.FileUpdate(tx, id, fileData)
 	if !b {
 		tx.Rollback()
