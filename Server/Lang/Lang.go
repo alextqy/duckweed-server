@@ -5,6 +5,7 @@ import lib "duckweed-server/Server/Lib"
 type language struct {
 	ReLoginRequired                  string
 	NoData                           string
+	AccountDoesNotExist              string
 	IncorrectPassword                string
 	PasswordLengthIsNotEnough        string
 	PasswordFormatError              string
@@ -43,6 +44,7 @@ func Lang() language {
 	if lib.CheckConf().Lang == "zh" {
 		l.ReLoginRequired = "需要重新登录"
 		l.NoData = "数据不存在"
+		l.AccountDoesNotExist = "账号不存在"
 		l.IncorrectPassword = "密码错误"
 		l.PasswordLengthIsNotEnough = "密码长度不够"
 		l.PasswordFormatError = "密码格式错误"
@@ -77,6 +79,7 @@ func Lang() language {
 	} else if lib.CheckConf().Lang == "en" {
 		l.ReLoginRequired = "re-login required"
 		l.NoData = "no data"
+		l.AccountDoesNotExist = "account does not exist"
 		l.IncorrectPassword = "incorrect password"
 		l.PasswordLengthIsNotEnough = "password length is not enough"
 		l.PasswordFormatError = "password format error"
@@ -111,6 +114,7 @@ func Lang() language {
 	} else {
 		l.ReLoginRequired = ""
 		l.NoData = ""
+		l.AccountDoesNotExist = ""
 		l.IncorrectPassword = ""
 		l.PasswordLengthIsNotEnough = ""
 		l.PasswordFormatError = ""

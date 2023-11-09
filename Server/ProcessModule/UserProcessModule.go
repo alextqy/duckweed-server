@@ -35,7 +35,7 @@ func SignIn(account, password string) entity.Result {
 
 	if userData.ID == 0 {
 		tx.Rollback()
-		res.Message = lang.NoData
+		res.Message = lang.AccountDoesNotExist
 		return res
 	}
 
