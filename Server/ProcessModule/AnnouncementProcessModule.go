@@ -17,7 +17,7 @@ func Announcements(userToken string) entity.Result {
 	}
 
 	permissions, _, _ := CheckLevel(userToken)
-	if permissions != 2 {
+	if permissions > 2 {
 		res.Message = lang.NoPermission
 		return res
 	}
@@ -44,7 +44,7 @@ func AnnouncementGet(userToken, id string) entity.Result {
 	}
 
 	permissions, _, _ := CheckLevel(userToken)
-	if permissions != 2 {
+	if permissions > 2 {
 		res.Message = lang.NoPermission
 		return res
 	}
