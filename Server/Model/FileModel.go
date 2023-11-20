@@ -30,14 +30,14 @@ func FileCount(db *sql.Tx, fileName string, userID int, dirID int) int {
 }
 
 func FileAdd(db *sql.Tx, data entity.FileEntity) (bool, string, int) {
-	sqlCom := "INSERT INTO File(FileName,FileType,FileSize,StoragePath,MD5,UserID,DirID,Createtime,Status,OutreachID) VALUES(?,?,?,?,?,?,?,?,?,?)"
+	sqlCom := "INSERT INTO File(FileName,FileType,FileSize,StoragePath,MD5,UserID,DirID,Createtime,Status,OutreachID,SourceAddress) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
 	data.Createtime = int(lib.TimeStamp())
 	data.Status = 1
-	row, err := stmt.Exec(data.FileName, data.FileType, data.FileSize, data.StoragePath, data.MD5, data.UserID, data.DirID, data.Createtime, data.Status, data.OutreachID)
+	row, err := stmt.Exec(data.FileName, data.FileType, data.FileSize, data.StoragePath, data.MD5, data.UserID, data.DirID, data.Createtime, data.Status, data.OutreachID, data.SourceAddress)
 	if err != nil {
 		return false, err.Error(), 0
 	}
@@ -73,7 +73,7 @@ func FileData(db *sql.Tx, id string) (bool, string, entity.FileEntity) {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID)
+		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -89,7 +89,7 @@ func FileDataSame(db *sql.Tx, dirID string, fileName string, fileType string) (b
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID)
+		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -105,7 +105,7 @@ func FileDataMD5(db *sql.Tx, md5 string) (bool, string, entity.FileEntity) {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID)
+		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
 		if err != nil {
 			return false, err.Error(), data
 		}

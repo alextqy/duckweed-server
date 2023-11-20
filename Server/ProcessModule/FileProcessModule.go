@@ -27,10 +27,10 @@ func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID, sourceAddress 
 		res.Message = lang.Typo
 		return res
 	}
-	if !lib.RegAll(fileName) {
-		res.Message = lang.FileNameFormatError
-		return res
-	}
+	// if !lib.RegAll(fileName) {
+	// 	res.Message = lang.FileNameFormatError
+	// 	return res
+	// }
 	if fileType != "" {
 		if len(fileType) > 16 {
 			res.Message = lang.Typo
@@ -300,6 +300,14 @@ func FileDel(userToken, id string) entity.Result {
 				res.Message = lang.NoPermission
 				return res
 			}
+			if lib.FileExist(fileData.StoragePath) {
+				b, s := lib.FileRemove(fileData.StoragePath)
+				if !b {
+					tx.Rollback()
+					res.Message = s
+					return res
+				}
+			}
 		}
 
 		logContent = " delete file data id: " + id
@@ -319,6 +327,14 @@ func FileDel(userToken, id string) entity.Result {
 			tx.Rollback()
 			res.Message = lang.NoPermission
 			return res
+		}
+		if lib.FileExist(fileData.StoragePath) {
+			b, s := lib.FileRemove(fileData.StoragePath)
+			if !b {
+				tx.Rollback()
+				res.Message = s
+				return res
+			}
 		}
 
 		if fileData.FileType != "" {
