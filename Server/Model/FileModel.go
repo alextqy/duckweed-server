@@ -127,7 +127,8 @@ func Files(db *sql.Tx, order int, fileName string, userID int, dirID int, status
 	}
 	if dirID > 0 {
 		condition_dirID = "DirID = " + lib.IntToString(dirID)
-	} else {
+	}
+	if dirID == 0 {
 		condition_dirID = "DirID = 0"
 	}
 	if status > 0 {
