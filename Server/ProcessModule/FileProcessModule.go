@@ -239,10 +239,10 @@ func Files(userToken, order, fileName, dirID, status string) entity.Result {
 	_, _, orderInt := lib.StringToInt(order)
 	_, _, dirIDInt := lib.StringToInt(dirID)
 	_, _, statusInt := lib.StringToInt(status)
-	if dirIDInt < 0 {
-		res.Message = lang.Typo
-		return res
-	}
+	// if dirIDInt < 0 {
+	// 	res.Message = lang.Typo
+	// 	return res
+	// }
 	if statusInt < 0 {
 		res.Message = lang.Typo
 		return res
