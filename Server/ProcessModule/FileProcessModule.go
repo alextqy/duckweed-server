@@ -55,7 +55,7 @@ func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID, sourceAddress 
 	}
 
 	_, _, fileSizeInt := lib.StringToInt(fileSize)
-	_, _, dirIDInt := lib.StringToInt(dirID)
+	_, _, dirIDInt := lib.StringToInt64(dirID)
 	if fileSizeInt <= 0 {
 		res.Message = lang.Typo
 		return res
@@ -77,13 +77,13 @@ func FileAdd(userToken, fileName, fileType, fileSize, md5, dirID, sourceAddress 
 		res.Message = s
 		return res
 	}
-	if checkFile.ID > 0 {
+	if checkFile.Id > 0 {
 		tx.Rollback()
 		res.Message = lang.FileAlreadyExists
 		return res
 	}
 
-	file := entity.FileEntity{}
+	file := entity.File{}
 	file.FileName = fileName
 	file.FileType = fileType
 	file.FileSize = fileSize
@@ -158,7 +158,7 @@ func FileModify(userToken, id, fileName, dirID, sourceAddress string) entity.Res
 		res.Message = lang.Typo
 		return res
 	}
-	_, _, dirIDInt := lib.StringToInt(dirID)
+	_, _, dirIDInt := lib.StringToInt64(dirID)
 	if dirIDInt < 0 {
 		res.Message = lang.Typo
 		return res
@@ -172,7 +172,7 @@ func FileModify(userToken, id, fileName, dirID, sourceAddress string) entity.Res
 		res.Message = s
 		return res
 	}
-	if fileData.ID == 0 {
+	if fileData.Id == 0 {
 		tx.Rollback()
 		res.Message = lang.NoData
 		return res
@@ -237,8 +237,8 @@ func Files(userToken, order, fileName, dirID, status string) entity.Result {
 	}
 
 	_, _, orderInt := lib.StringToInt(order)
-	_, _, dirIDInt := lib.StringToInt(dirID)
-	_, _, statusInt := lib.StringToInt(status)
+	_, _, dirIDInt := lib.StringToInt64(dirID)
+	_, _, statusInt := lib.StringToInt64(status)
 	// if dirIDInt < 0 {
 	// 	res.Message = lang.Typo
 	// 	return res
@@ -290,7 +290,7 @@ func FileDel(userToken, id string) entity.Result {
 				res.Message = s
 				return res
 			}
-			if fileData.ID == 0 {
+			if fileData.Id == 0 {
 				tx.Rollback()
 				res.Message = lang.NoData
 				return res
@@ -318,7 +318,7 @@ func FileDel(userToken, id string) entity.Result {
 			res.Message = s
 			return res
 		}
-		if fileData.ID == 0 {
+		if fileData.Id == 0 {
 			tx.Rollback()
 			res.Message = lang.NoData
 			return res
@@ -419,7 +419,7 @@ func FileMove(userToken, dirID, ids string) entity.Result {
 				res.Message = s
 				return res
 			}
-			if r.ID == 0 {
+			if r.Id == 0 {
 				tx.Rollback()
 				res.Message = lang.FileDoesNotExist
 				return res
@@ -438,7 +438,7 @@ func FileMove(userToken, dirID, ids string) entity.Result {
 			res.Message = s
 			return res
 		}
-		if r.ID == 0 {
+		if r.Id == 0 {
 			tx.Rollback()
 			res.Message = lang.FileDoesNotExist
 			return res

@@ -1,7 +1,7 @@
 package entity
 
-type AnnouncementEntity struct {
-	ID         int
-	Content    string
-	Createtime int
+type Announcement struct {
+	ID         int64
+	Content    string `xorm:"'Content'"`
+	Createtime int64  `xorm:"'Createtime'"`
 }

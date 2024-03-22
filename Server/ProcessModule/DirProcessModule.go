@@ -25,7 +25,7 @@ func Dirs(userToken, order, parentID, dirName string) entity.Result {
 	}
 
 	_, _, orderInt := lib.StringToInt(order)
-	_, _, parentIDInt := lib.StringToInt(parentID)
+	_, _, parentIDInt := lib.StringToInt64(parentID)
 	if parentIDInt < 0 {
 		res.Message = lang.Typo
 		return res
@@ -69,13 +69,13 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 		return res
 	}
 
-	_, _, idInt := lib.StringToInt(id)
+	_, _, idInt := lib.StringToInt64(id)
 	if idInt < 0 {
 		res.Message = lang.Typo
 		return res
 	}
 
-	_, _, parentIDInt := lib.StringToInt(parentID)
+	_, _, parentIDInt := lib.StringToInt64(parentID)
 	if parentIDInt < 0 {
 		res.Message = lang.Typo
 		return res
@@ -102,14 +102,14 @@ func DirAction(userToken, dirName, parentID, id string) entity.Result {
 		}
 	}
 
-	b, s, sd := model.DirDataSame(tx, lib.IntToString(userData.ID), parentID, dirName)
+	b, s, sd := model.DirDataSame(tx, lib.Int64ToString(userData.ID), parentID, dirName)
 	if !b {
 		tx.Rollback()
 		res.Message = s
 		return res
 	}
 
-	dir := entity.DirEntity{}
+	dir := entity.Dir{}
 	dir.DirName = dirName
 	dir.ParentID = parentIDInt
 	dir.UserID = userData.ID
@@ -286,10 +286,10 @@ func DirDel(userToken, id string) entity.Result {
 	return res
 }
 
-func dirRec(tx *sql.Tx, id string, userID int) (bool, string) {
+func dirRec(tx *sql.Tx, id string, userID int64) (bool, string) {
 	lang := lang.Lang()
 
-	_, _, idInt := lib.StringToInt(id)
+	_, _, idInt := lib.StringToInt64(id)
 
 	fileList := model.Files(tx, 0, "", userID, idInt, 0)
 	if len(fileList) > 0 {
@@ -310,7 +310,7 @@ func dirRec(tx *sql.Tx, id string, userID int) (bool, string) {
 	dirList := model.Dirs(tx, 0, "", idInt, userID)
 	if len(dirList) > 0 {
 		for i := 0; i < len(dirList); i++ {
-			b, s := dirRec(tx, lib.IntToString(dirList[i].ID), userID)
+			b, s := dirRec(tx, lib.IntToString(int(dirList[i].ID)), userID)
 			if !b {
 				return b, s
 			}

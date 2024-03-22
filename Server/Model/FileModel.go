@@ -29,13 +29,13 @@ func FileCount(db *sql.Tx, fileName string, userID int, dirID int) int {
 	return count
 }
 
-func FileAdd(db *sql.Tx, data entity.FileEntity) (bool, string, int) {
+func FileAdd(db *sql.Tx, data entity.File) (bool, string, int) {
 	sqlCom := "INSERT INTO File(FileName,FileType,FileSize,StoragePath,MD5,UserID,DirID,Createtime,Status,OutreachID,SourceAddress) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	data.Createtime = int(lib.TimeStamp())
+	data.Createtime = lib.TimeStamp()
 	data.Status = 1
 	row, err := stmt.Exec(data.FileName, data.FileType, data.FileSize, data.StoragePath, data.MD5, data.UserID, data.DirID, data.Createtime, data.Status, data.OutreachID, data.SourceAddress)
 	if err != nil {
@@ -48,7 +48,7 @@ func FileAdd(db *sql.Tx, data entity.FileEntity) (bool, string, int) {
 	return true, "", int(id)
 }
 
-func FileUpdate(db *sql.Tx, id string, data entity.FileEntity) (bool, string, int) {
+func FileUpdate(db *sql.Tx, id string, data entity.File) (bool, string, int) {
 	sqlCom := "UPDATE File SET FileName=?,FileType=?,FileSize=?,StoragePath=?,MD5=?,UserID=?,DirID=?,Status=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -65,15 +65,15 @@ func FileUpdate(db *sql.Tx, id string, data entity.FileEntity) (bool, string, in
 	return true, "", int(affect)
 }
 
-func FileData(db *sql.Tx, id string) (bool, string, entity.FileEntity) {
-	data := entity.FileEntity{}
+func FileData(db *sql.Tx, id string) (bool, string, entity.File) {
+	data := entity.File{}
 	sqlCom := "SELECT * FROM File WHERE ID=" + id
 	rows, err := db.Query(sqlCom)
 	if err != nil {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
+		err := rows.Scan(&data.Id, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -81,15 +81,15 @@ func FileData(db *sql.Tx, id string) (bool, string, entity.FileEntity) {
 	return true, "", data
 }
 
-func FileDataSame(db *sql.Tx, dirID string, fileName string, fileType string) (bool, string, entity.FileEntity) {
-	data := entity.FileEntity{}
+func FileDataSame(db *sql.Tx, dirID string, fileName string, fileType string) (bool, string, entity.File) {
+	data := entity.File{}
 	sqlCom := "SELECT * FROM File WHERE DirID='" + dirID + "' AND FileName='" + fileName + "' AND FileType='" + fileType + "'"
 	rows, err := db.Query(sqlCom)
 	if err != nil {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
+		err := rows.Scan(&data.Id, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -97,15 +97,15 @@ func FileDataSame(db *sql.Tx, dirID string, fileName string, fileType string) (b
 	return true, "", data
 }
 
-func FileDataMD5(db *sql.Tx, md5 string) (bool, string, entity.FileEntity) {
-	data := entity.FileEntity{}
+func FileDataMD5(db *sql.Tx, md5 string) (bool, string, entity.File) {
+	data := entity.File{}
 	sqlCom := "SELECT * FROM File WHERE MD5='" + md5 + "'"
 	rows, err := db.Query(sqlCom)
 	if err != nil {
 		return false, err.Error(), data
 	}
 	for rows.Next() {
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
+		err := rows.Scan(&data.Id, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
 		if err != nil {
 			return false, err.Error(), data
 		}
@@ -113,8 +113,8 @@ func FileDataMD5(db *sql.Tx, md5 string) (bool, string, entity.FileEntity) {
 	return true, "", data
 }
 
-func Files(db *sql.Tx, order int, fileName string, userID int, dirID int, status int) []entity.FileEntity {
-	datas := []entity.FileEntity{}
+func Files(db *sql.Tx, order int, fileName string, userID int64, dirID int64, status int64) []entity.File {
+	datas := []entity.File{}
 	condition_fileName := "1=1"
 	condition_userID := "1=1"
 	condition_dirID := "1=1"
@@ -123,16 +123,16 @@ func Files(db *sql.Tx, order int, fileName string, userID int, dirID int, status
 		condition_fileName = "FileName LIKE '%" + fileName + "%'"
 	}
 	if userID > 0 {
-		condition_userID = "UserID = " + lib.IntToString(userID)
+		condition_userID = "UserID = " + lib.Int64ToString(userID)
 	}
 	if dirID > 0 {
-		condition_dirID = "DirID = " + lib.IntToString(dirID)
+		condition_dirID = "DirID = " + lib.Int64ToString(dirID)
 	}
 	if dirID == 0 {
 		condition_dirID = "DirID = 0"
 	}
 	if status > 0 {
-		condition_status = "Status = " + lib.IntToString(status)
+		condition_status = "Status = " + lib.Int64ToString(status)
 	}
 	orderBy := ""
 	if order == -1 {
@@ -147,8 +147,8 @@ func Files(db *sql.Tx, order int, fileName string, userID int, dirID int, status
 		return nil
 	}
 	for rows.Next() {
-		data := entity.FileEntity{}
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
+		data := entity.File{}
+		err := rows.Scan(&data.Id, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
 		if err != nil {
 			fmt.Println(err.Error())
 			return nil
@@ -158,8 +158,8 @@ func Files(db *sql.Tx, order int, fileName string, userID int, dirID int, status
 	return datas
 }
 
-func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, userID int, dirID int, status int) (int, int, int, []entity.FileEntity) {
-	datas := []entity.FileEntity{}
+func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, userID int, dirID int, status int) (int, int, int, []entity.File) {
+	datas := []entity.File{}
 	condition_fileName := "1=1"
 	condition_userID := "1=1"
 	condition_dirID := "1=1"
@@ -201,8 +201,8 @@ func FileList(db *sql.Tx, page int, pageSize int, order int, fileName string, us
 		return 0, 0, 0, nil
 	}
 	for rows.Next() {
-		data := entity.FileEntity{}
-		err := rows.Scan(&data.ID, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
+		data := entity.File{}
+		err := rows.Scan(&data.Id, &data.FileName, &data.FileType, &data.FileSize, &data.StoragePath, &data.MD5, &data.UserID, &data.DirID, &data.Createtime, &data.Status, &data.OutreachID, &data.SourceAddress)
 		if err != nil {
 			fmt.Println(err.Error())
 			return 0, 0, 0, nil

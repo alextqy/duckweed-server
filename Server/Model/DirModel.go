@@ -29,13 +29,13 @@ func DirCount(db *sql.Tx, dirName string, parentID int, userID int) int {
 	return count
 }
 
-func DirAdd(db *sql.Tx, data entity.DirEntity) (bool, string, int) {
+func DirAdd(db *sql.Tx, data entity.Dir) (bool, string, int) {
 	sqlCom := "INSERT INTO Dir(DirName,ParentID,UserID,Createtime) VALUES(?,?,?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	data.Createtime = int(lib.TimeStamp())
+	data.Createtime = lib.TimeStamp()
 	row, err := stmt.Exec(data.DirName, data.ParentID, data.UserID, data.Createtime)
 	if err != nil {
 		return false, err.Error(), 0
@@ -47,7 +47,7 @@ func DirAdd(db *sql.Tx, data entity.DirEntity) (bool, string, int) {
 	return true, "", int(id)
 }
 
-func DirUpdate(db *sql.Tx, id string, data entity.DirEntity) (bool, string, int) {
+func DirUpdate(db *sql.Tx, id string, data entity.Dir) (bool, string, int) {
 	sqlCom := "UPDATE Dir SET DirName=?,ParentID=?,UserID=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -64,8 +64,8 @@ func DirUpdate(db *sql.Tx, id string, data entity.DirEntity) (bool, string, int)
 	return true, "", int(affect)
 }
 
-func DirData(db *sql.Tx, id string) (bool, string, entity.DirEntity) {
-	data := entity.DirEntity{}
+func DirData(db *sql.Tx, id string) (bool, string, entity.Dir) {
+	data := entity.Dir{}
 	sqlCom := "SELECT * FROM Dir WHERE ID=" + id
 	rows, err := db.Query(sqlCom)
 	if err != nil {
@@ -80,8 +80,8 @@ func DirData(db *sql.Tx, id string) (bool, string, entity.DirEntity) {
 	return true, "", data
 }
 
-func DirDataSame(db *sql.Tx, userID string, parentID string, dirName string) (bool, string, entity.DirEntity) {
-	data := entity.DirEntity{}
+func DirDataSame(db *sql.Tx, userID string, parentID string, dirName string) (bool, string, entity.Dir) {
+	data := entity.Dir{}
 	sqlCom := "SELECT * FROM Dir WHERE UserID=" + userID + " AND parentID=" + parentID + " AND DirName='" + dirName + "'"
 	rows, err := db.Query(sqlCom)
 	if err != nil {
@@ -96,8 +96,8 @@ func DirDataSame(db *sql.Tx, userID string, parentID string, dirName string) (bo
 	return true, "", data
 }
 
-func Dirs(db *sql.Tx, order int, dirName string, parentID int, userID int) []entity.DirEntity {
-	datas := []entity.DirEntity{}
+func Dirs(db *sql.Tx, order int, dirName string, parentID int64, userID int64) []entity.Dir {
+	datas := []entity.Dir{}
 	condition_dirName := "1=1"
 	condition_parentID := "1=1"
 	condition_userID := "1=1"
@@ -105,12 +105,12 @@ func Dirs(db *sql.Tx, order int, dirName string, parentID int, userID int) []ent
 		condition_dirName = "DirName LIKE '%" + dirName + "%'"
 	}
 	if parentID > 0 {
-		condition_parentID = "ParentID = " + lib.IntToString(parentID)
+		condition_parentID = "ParentID = " + lib.Int64ToString(parentID)
 	} else {
 		condition_parentID = "ParentID = 0"
 	}
 	if userID > 0 {
-		condition_userID = "UserID = " + lib.IntToString(userID)
+		condition_userID = "UserID = " + lib.Int64ToString(userID)
 	}
 	orderBy := ""
 	if order == -1 {
@@ -125,7 +125,7 @@ func Dirs(db *sql.Tx, order int, dirName string, parentID int, userID int) []ent
 		return nil
 	}
 	for rows.Next() {
-		data := entity.DirEntity{}
+		data := entity.Dir{}
 		err := rows.Scan(&data.ID, &data.DirName, &data.ParentID, &data.UserID, &data.Createtime)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -136,8 +136,8 @@ func Dirs(db *sql.Tx, order int, dirName string, parentID int, userID int) []ent
 	return datas
 }
 
-func DirList(db *sql.Tx, page int, pageSize int, order int, dirName string, parentID int, userID int) (int, int, int, []entity.DirEntity) {
-	datas := []entity.DirEntity{}
+func DirList(db *sql.Tx, page int, pageSize int, order int, dirName string, parentID int, userID int) (int, int, int, []entity.Dir) {
+	datas := []entity.Dir{}
 	condition_dirName := "1=1"
 	condition_parentID := "1=1"
 	condition_userID := "1=1"
@@ -176,7 +176,7 @@ func DirList(db *sql.Tx, page int, pageSize int, order int, dirName string, pare
 		return 0, 0, 0, nil
 	}
 	for rows.Next() {
-		data := entity.DirEntity{}
+		data := entity.Dir{}
 		err := rows.Scan(&data.ID, &data.DirName, &data.ParentID, &data.UserID, &data.Createtime)
 		if err != nil {
 			fmt.Println(err.Error())

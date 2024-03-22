@@ -14,13 +14,13 @@ func AnnouncementCount(db *sql.Tx) int {
 	return count
 }
 
-func AnnouncementAdd(db *sql.Tx, data entity.AnnouncementEntity) (bool, string, int) {
+func AnnouncementAdd(db *sql.Tx, data entity.Announcement) (bool, string, int) {
 	sqlCom := "INSERT INTO Announcement(Content,Createtime) VALUES(?,?)"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
 		return false, err.Error(), 0
 	}
-	data.Createtime = int(lib.TimeStamp())
+	data.Createtime = lib.TimeStamp()
 	row, err := stmt.Exec(data.Content, data.Createtime)
 	if err != nil {
 		return false, err.Error(), 0
@@ -32,7 +32,7 @@ func AnnouncementAdd(db *sql.Tx, data entity.AnnouncementEntity) (bool, string, 
 	return true, "", int(id)
 }
 
-func AnnouncementUpdate(db *sql.Tx, id string, data entity.AnnouncementEntity) (bool, string, int) {
+func AnnouncementUpdate(db *sql.Tx, id string, data entity.Announcement) (bool, string, int) {
 	sqlCom := "UPDATE Announcement SET Content=? WHERE ID=?"
 	stmt, err := db.Prepare(sqlCom)
 	if err != nil {
@@ -49,8 +49,8 @@ func AnnouncementUpdate(db *sql.Tx, id string, data entity.AnnouncementEntity) (
 	return true, "", int(affect)
 }
 
-func AnnouncementData(db *sql.Tx, id string) (bool, string, entity.AnnouncementEntity) {
-	data := entity.AnnouncementEntity{}
+func AnnouncementData(db *sql.Tx, id string) (bool, string, entity.Announcement) {
+	data := entity.Announcement{}
 	sqlCom := "SELECT * FROM Announcement WHERE ID=" + id
 	rows, err := db.Query(sqlCom)
 	if err != nil {
@@ -65,8 +65,8 @@ func AnnouncementData(db *sql.Tx, id string) (bool, string, entity.AnnouncementE
 	return true, "", data
 }
 
-func Announcements(db *sql.Tx, order int) []entity.AnnouncementEntity {
-	datas := []entity.AnnouncementEntity{}
+func Announcements(db *sql.Tx, order int) []entity.Announcement {
+	datas := []entity.Announcement{}
 	orderBy := ""
 	if order == -1 {
 		orderBy = "DESC"
@@ -80,7 +80,7 @@ func Announcements(db *sql.Tx, order int) []entity.AnnouncementEntity {
 		return nil
 	}
 	for rows.Next() {
-		data := entity.AnnouncementEntity{}
+		data := entity.Announcement{}
 		err := rows.Scan(&data.ID, &data.Content, &data.Createtime)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -91,8 +91,8 @@ func Announcements(db *sql.Tx, order int) []entity.AnnouncementEntity {
 	return datas
 }
 
-func AnnouncementList(db *sql.Tx, page int, pageSize int, order int, content string) (int, int, int, []entity.AnnouncementEntity) {
-	datas := []entity.AnnouncementEntity{}
+func AnnouncementList(db *sql.Tx, page int, pageSize int, order int, content string) (int, int, int, []entity.Announcement) {
+	datas := []entity.Announcement{}
 	if page <= 1 {
 		page = 1
 	}
@@ -116,7 +116,7 @@ func AnnouncementList(db *sql.Tx, page int, pageSize int, order int, content str
 		return 0, 0, 0, nil
 	}
 	for rows.Next() {
-		data := entity.AnnouncementEntity{}
+		data := entity.Announcement{}
 		err := rows.Scan(&data.ID, &data.Content, &data.Createtime)
 		if err != nil {
 			fmt.Println(err.Error())

@@ -95,7 +95,7 @@ func AnnouncementAdd(userToken, content string) entity.Result {
 	}
 
 	_, _, tx, db := model.ConnDB()
-	data := entity.AnnouncementEntity{}
+	data := entity.Announcement{}
 	data.Content = content
 	b, s, r := model.AnnouncementAdd(tx, data)
 	if !b {

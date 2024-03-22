@@ -6,7 +6,7 @@ import (
 	model "duckweed-server/Server/Model"
 )
 
-func CheckLevel(userToken string) (int, string, int) {
+func CheckLevel(userToken string) (int64, string, int64) {
 	_, _, tx, db := model.ConnDB()
 	if userToken == "" {
 		tx.Rollback()
@@ -30,8 +30,8 @@ func CheckLevel(userToken string) (int, string, int) {
 	return userData.Level, userData.Account, userData.ID
 }
 
-func CheckToken(userToken string) entity.UserEntity {
-	userData := entity.UserEntity{}
+func CheckToken(userToken string) entity.User {
+	userData := entity.User{}
 
 	_, _, tx, db := model.ConnDB()
 	if userToken == "" {
@@ -53,10 +53,10 @@ func CheckToken(userToken string) entity.UserEntity {
 	return userData
 }
 
-func UserPWD(data entity.UserEntity, password string) string {
-	return lib.MD5(lib.MD5(lib.IntToString(data.Createtime) + data.Account + password + lib.IntToString(data.Createtime)))
+func UserPWD(data entity.User, password string) string {
+	return lib.MD5(lib.MD5(lib.Int64ToString(data.Createtime) + data.Account + password + lib.Int64ToString(data.Createtime)))
 }
 
-func UserToken(data entity.UserEntity) string {
+func UserToken(data entity.User) string {
 	return lib.MD5(lib.MD5(lib.TimeNowStr() + data.Password + lib.RandStr(4) + lib.TimeNowStr()))
 }

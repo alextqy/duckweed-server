@@ -82,7 +82,7 @@ func SignIn(account, password string) entity.Result {
 	}
 
 	res.State = true
-	res.Message = lib.IntToString(userData.Level)
+	res.Message = lib.Int64ToString(userData.Level)
 	res.Data = userData.UserToken
 
 	tx.Commit()
@@ -263,7 +263,7 @@ func SetAvailableSpace(userToken, id, availableSpace string) entity.Result {
 		res.Message = lang.Typo
 		return res
 	}
-	_, _, availableSpaceInt := lib.StringToInt(availableSpace)
+	_, _, availableSpaceInt := lib.StringToInt64(availableSpace)
 	if availableSpaceInt <= 0 {
 		res.Message = lang.Typo
 		return res
@@ -344,7 +344,7 @@ func SetRootAccount(userToken, id string) entity.Result {
 		res.Message = lang.NoData
 		return res
 	}
-	_, _, idInt := lib.StringToInt(id)
+	_, _, idInt := lib.StringToInt64(id)
 	if rootID == idInt {
 		tx.Rollback()
 		res.Message = lang.OperationFailed
@@ -421,7 +421,7 @@ func DisableUser(userToken, id string) entity.Result {
 		res.Message = lang.NoData
 		return res
 	}
-	_, _, idInt := lib.StringToInt(id)
+	_, _, idInt := lib.StringToInt64(id)
 	if rootID == idInt {
 		tx.Rollback()
 		res.Message = lang.OperationFailed
@@ -630,15 +630,15 @@ func SignUp(account, name, password, email, captcha string) entity.Result {
 
 	lib.FileRemove("../Temp/Captcha/" + captcha)
 
-	_, _, iss := lib.StringToInt(lib.CheckConf().InitialSpaceSize)
+	_, _, iss := lib.StringToInt64(lib.CheckConf().InitialSpaceSize)
 
-	user := entity.UserEntity{}
+	user := entity.User{}
 	user.Account = account
 	user.Name = name
 	user.Password = password
 	user.Level = 1
 	user.AvailableSpace = iss
-	user.Createtime = int(lib.TimeStamp())
+	user.Createtime = lib.TimeStamp()
 	user.Email = email
 
 	_, _, tx, db := model.ConnDB()
